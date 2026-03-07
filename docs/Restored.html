@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>samvabien — Olive & Terre · Hero variations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Nunito', system-ui, -apple-system, sans-serif; transition: background 0.3s, color 0.3s; }
+
+  .top-bar {
+    position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    transition: background 0.3s;
+  }
+  .top-bar h1 { font-size: 13px; font-weight: 800; white-space: nowrap; }
+  .cg { display: flex; gap: 3px; flex-wrap: wrap; }
+  .cb {
+    padding: 5px 10px; border-radius: 7px; border: 1.5px solid transparent;
+    font-family: inherit; font-size: 10px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .cs { width: 1px; height: 20px; flex-shrink: 0; }
+
+  .phones-row {
+    display: flex; justify-content: center; gap: 24px; padding: 28px 16px 40px;
+    flex-wrap: wrap; align-items: flex-start;
+  }
+  .pc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .ps { font-size: 9px; font-weight: 600; text-align: center; max-width: 280px; margin-bottom: 4px; line-height: 1.4; }
+
+  .pf {
+    border-radius: 36px; padding: 44px 0 20px; width: 300px;
+    overflow: hidden; position: relative;
+    aspect-ratio: 9 / 19.5;
+  }
+  .pi { padding: 0 13px; }
+  .sb { display: flex; justify-content: space-between; padding: 3px 13px 5px; font-size: 9px; font-weight: 700; opacity: 0.4; }
+
+  .pd { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.7); } }
+
+  .pt { width: 100%; height: 6px; border-radius: 3px; position: relative; margin-top: 6px; }
+  .ptf { height: 100%; border-radius: 3px; position: absolute; left: 0; top: 0; }
+  .pm {
+    position: absolute; top: -3px; width: 12px; height: 12px; border-radius: 50%;
+    transform: translateX(-50%); border: 2px solid; box-sizing: border-box;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar" id="topbar"></div>
+<div class="phones-row" id="phones"></div>
+
+<script>
+let cfg = { moment: 'afternoon', milkStatus: 'in', sleepStatus: 'in' };
+
+const C = {
+  day: {
+    bg:'#f6f5ee', sf:'#ffffff', tx:'#32321e', txS:'#8a8870',
+    sl: { bg:'#eaecda', ac:'#8a9a6a', ic:'#6a7a4a' },
+    mk: { bg:'#f5e6d6', ac:'#c08a60', ic:'#a06840' },
+    pr: { bg:'#6a7a4a', tx:'#fff' },
+    sc: { bg:'#eaecda', tx:'#6a7a4a' },
+    av: { bg:'#dde2c8', dt:'#8a9a6a', tx:'#4a5a32' },
+    ir: { ac:'#8a9a5a' },
+    rBg:'rgba(120,130,80,0.15)', rBd:'rgba(120,130,80,0.28)',
+    bd:'rgba(0,0,0,0.06)', hd:'rgba(0,0,0,0.12)',
+    trk:'#dce0cc', avg:'#a0a486',
+    cta:'rgba(138,154,106,0.2)',
+    hg1:'#a8b490', hg2:'#8a9c72', hg3:'#6a8054',
+  },
+  night: {
+    bg:'#181810', sf:'#22221a', tx:'#c8c8b0', txS:'#7a7a60',
+    sl: { bg:'#222818', ac:'#7a8a5a', ic:'#98a878' },
+    mk: { bg:'#261e14', ac:'#b08050', ic:'#cca070' },
+    pr: { bg:'#4a5a32', tx:'#fff' },
+    sc: { bg:'#222818', tx:'#7a8a5a' },
+    av: { bg:'#282e1c', dt:'#7a8a5a', tx:'#98a878' },
+    ir: { ac:'#7a8a4a' },
+    rBg:'rgba(100,110,60,0.2)', rBd:'rgba(100,110,60,0.3)',
+    bd:'rgba(255,255,255,0.06)', hd:'rgba(255,255,255,0.12)',
+    trk:'#222618', avg:'#5a6a48',
+    cta:'rgba(122,138,90,0.2)',
+    hg1:'#3a4228', hg2:'#2e381e', hg3:'#222c16',
+  }
+};
+
+const moments = {
+  afternoon: {l:'Après-midi',t:'15:53',m:'day',h:'sleep',e:'😴',tx:'Sam dort',tm:'1h23',s:'Endormi à 14h30'},
+  evening:   {l:'Soir',t:'18:45',m:'night',h:'awake',e:'🌤️',tx:'Sam est réveillé',tm:'2h15',s:'Éveillé depuis 16h30'},
+  night:     {l:'Nuit',t:'3:12',m:'night',h:'night',e:'💤',tx:'Sam dort',tm:'7h42',s:'Couché à 19h30 · 0 réveil'},
+};
+
+const isN = () => moments[cfg.moment].m === 'night';
+const gc = () => C[isN()?'night':'day'];
+const mo = () => moments[cfg.moment];
+const isNM = () => cfg.moment === 'night';
+
+function mProg() {
+  const m = cfg.moment;
+  if (m==='afternoon') return {mP:55,sP:68,mA:60,sA:62};
+  if (m==='evening') return {mP:72,sP:85,mA:78,sA:80};
+  return {mP:82,sP:95,mA:88,sA:90};
+}
+function mkD() {
+  const s=cfg.milkStatus,p=mProg();
+  if (s==='below') return {v:'280 mL',f:Math.max(p.mP-15,5),a:p.mA,r:false};
+  if (s==='in') return {v:'480 mL',f:p.mP,a:p.mA,r:true};
+  return {v:'720 mL',f:Math.min(p.mP+25,98),a:p.mA,r:false};
+}
+function slD() {
+  const s=cfg.sleepStatus,p=mProg();
+  if (s==='below') return {v:'8h20',f:Math.max(p.sP-20,5),a:p.sA,r:false};
+  if (s==='in') return {v:'12h40',f:p.sP,a:p.sA,r:true};
+  return {v:'16h10',f:Math.min(p.sP+15,98),a:p.sA,r:false};
+}
+
+function chk(cc,inR) {
+  if (!inR) return '';
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:${cc.ir.ac};color:#fff;font-size:9px;font-weight:800">✓</span>`;
+}
+
+function pBar(cc,cat,fp,ap,inR) {
+  const fc = inR ? cc.ir.ac : cat;
+  return `<div class="pt" style="background:${cc.trk}">
+    <div style="position:absolute;left:52%;width:36%;height:100%;background:${cc.rBg};border-radius:3px;border:1px solid ${cc.rBd}"></div>
+    <div class="ptf" style="width:${fp}%;background:${fc};opacity:${inR?0.8:0.5}"></div>
+    <div class="pm" style="left:${ap}%;background:${cc.rBd};border-color:${cc.rBd}"></div>
+    <div style="position:absolute;top:-2px;left:${fp}%;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:${cc.sf};box-shadow:0 0 0 1.5px ${fc}"></div>
+  </div>`;
+}
+
+function det(cc) {
+  const its = [
+    {d:cc.sl.ac,l:'Sieste',t:'14h30',v:'1h23',cl:cc.sl.ic},
+    {d:cc.mk.ac,l:'Biberon',t:'12h15',v:'150 mL',cl:cc.mk.ic},
+    {d:cc.sl.ac,l:'Sieste',t:'matin',v:'1h00',cl:cc.sl.ic},
+    {d:cc.mk.ac,l:'Biberon',t:'matin',v:'180 mL',cl:cc.mk.ic},
+    {d:cc.sl.ac,l:'Nuit',t:'19h30→5h50',v:'10h20',cl:cc.sl.ic},
+  ];
+  return its.map(i=>`<div style="border-bottom:1px solid ${cc.bd}"><div style="display:flex;align-items:center;gap:7px;padding:6px 0">
+    <div style="width:5px;height:5px;border-radius:50%;background:${i.d}"></div>
+    <div style="font-size:10px;font-weight:600;color:${cc.tx};flex:1">${i.l}</div>
+    <div style="font-size:9px;font-weight:600;color:${cc.txS};width:60px;text-align:right">${i.t}</div>
+    <div style="font-size:10px;font-weight:700;color:${i.cl};width:46px">${i.v}</div>
+  </div></div>`).join('');
+}
+
+// ====== SHARED PARTS ======
+function hdr(cc, m) {
+  return `<div class="sb" style="color:${cc.txS}"><span>${m.t}</span><span>📶 🔋</span></div>
+  <div class="pi">
+    <div style="padding:2px 0 6px">
+      <div style="font-size:9px;font-weight:600;color:${cc.txS}">Vendredi 7 mars</div>
+    </div>`;
+}
+
+function dtSec(cc) {
+  return `<div style="border-top:1px solid ${cc.bd};padding-top:8px">
+    <div style="font-size:8px;font-weight:700;color:${cc.txS};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">Aujourd'hui</div>
+    ${det(cc)}
+  </div></div>`;
+}
+
+function nightBottom(cc) {
+  return `<div style="border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px;background:${cc.mk.bg}">
+    <div style="font-size:20px">🍼</div>
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:700;color:${cc.tx}">Biberon nocturne</div>
+      <div style="font-size:9px;font-weight:600;color:${cc.txS}">Ce soir : 0 bib.</div>
+    </div>
+    <button style="width:36px;height:36px;border-radius:12px;border:none;font-size:18px;cursor:pointer;background:${cc.cta};color:${cc.mk.ic}">+</button>
+  </div>
+  <button style="width:100%;border:none;border-radius:12px;padding:10px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:${cc.sc.bg};color:${cc.txS}">🌅 Réveil du matin</button>
+  <div style="text-align:center;padding:14px 0;opacity:0.25"><div style="font-size:12px;font-weight:700;color:${cc.txS}">Tout va bien</div></div>
+  </div>`;
+}
+
+// Shared: V3-style KPI cards (bottom accent, tinted terre gradient, CTA "+")
+function kpiCards(cc, mk, sl, n) {
+  const mkSt = n
+    ? `background:linear-gradient(165deg, ${cc.mk.bg}, ${cc.mk.ac}10);border:1px solid ${cc.mk.ac}15;border-bottom:2.5px solid ${cc.mk.ac}60;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${cc.mk.ac}10`
+    : `background:linear-gradient(165deg, ${cc.mk.bg}, ${cc.mk.ac}08);border:1px solid ${cc.mk.ac}10;border-bottom:2.5px solid ${cc.mk.ac}40;box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 3px 12px ${cc.mk.ac}06`;
+  const slSt = n
+    ? `background:linear-gradient(165deg, ${cc.sl.bg}, ${cc.sl.ac}10);border:1px solid ${cc.sl.ac}15;border-bottom:2.5px solid ${cc.sl.ac}60;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${cc.sl.ac}10`
+    : `background:linear-gradient(165deg, ${cc.sl.bg}, ${cc.sl.ac}08);border:1px solid ${cc.sl.ac}10;border-bottom:2.5px solid ${cc.sl.ac}40;box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 3px 12px ${cc.sl.ac}06`;
+  const ctaSt = (ic) => `width:30px;height:30px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;background:${ic}15;color:${ic};box-shadow:inset 0 1px 0 rgba(255,255,255,${n?'0.05':'0.2'}), 0 2px 4px ${ic}10`;
+
+  return `
+    <div style="border-radius:18px;padding:11px 11px 11px 14px;margin-bottom:8px;${mkSt}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">🍼</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${cc.mk.ic}">Lait aujourd'hui</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${cc.tx};line-height:1.1">${mk.v}</div>
+            ${chk(cc,mk.r)}
+          </div>
+        </div>
+        <button style="${ctaSt(cc.mk.ic)}">+</button>
+      </div>
+      ${pBar(cc,cc.mk.ac,mk.f,mk.a,mk.r)}
+    </div>
+    <div style="border-radius:18px;padding:11px 11px 11px 14px;margin-bottom:10px;${slSt}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">😴</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${cc.sl.ic}">Sommeil total</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${cc.tx};line-height:1.1">${sl.v}</div>
+            ${chk(cc,sl.r)}
+          </div>
+        </div>
+        <button style="${ctaSt(cc.sl.ic)}">+</button>
+      </div>
+      ${pBar(cc,cc.sl.ac,sl.f,sl.a,sl.r)}
+    </div>`;
+}
+
+// ===================== V0 — VANILLA =====================
+function heroFlat(cc, m, isSl) {
+  return `<button style="width:100%;text-align:center;cursor:pointer;font-family:inherit;position:relative;border-radius:20px;padding:20px 18px 16px;margin-bottom:10px;border:none;background:${isSl||isNM()?cc.av.bg:cc.sc.bg}">
+    <div style="font-size:28px;margin-bottom:3px">${m.e}</div>
+    <div style="font-size:13px;font-weight:700;color:${isSl||isNM()?cc.av.tx:cc.tx}">${m.tx}</div>
+    <div style="font-size:36px;font-weight:800;color:${isSl||isNM()?cc.av.tx:cc.tx};line-height:1;letter-spacing:-1px">${m.tm}</div>
+    <div style="font-size:9px;font-weight:600;color:${isSl||isNM()?cc.av.tx:cc.txS};opacity:0.5;margin-top:2px">${m.s}</div>
+    ${isSl||isNM()?`<div class="pd" style="background:${cc.av.dt};position:absolute;top:13px;right:13px"></div>`:''}
+  </button>`;
+}
+
+function renderV0(cc,m,mk,sl,isSl) {
+  const n = isN();
+  if (isNM()) return `${hdr(cc,m)}${heroFlat(cc,m,true)}${nightBottom(cc)}`;
+
+  const mkSt = `background:${cc.mk.bg};border-radius:16px;padding:11px 11px 11px 14px;margin-bottom:8px`;
+  const slSt = `background:${cc.sl.bg};border-radius:16px;padding:11px 11px 11px 14px;margin-bottom:10px`;
+
+  return `${hdr(cc,m)}
+    ${heroFlat(cc,m,isSl)}
+    <div style="${mkSt}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">🍼</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${cc.mk.ic}">Lait aujourd'hui</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${cc.tx};line-height:1.1">${mk.v}</div>
+            ${chk(cc,mk.r)}
+          </div>
+        </div>
+        <button style="width:30px;height:30px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;background:${cc.cta};color:${cc.mk.ic}">+</button>
+      </div>
+      ${pBar(cc,cc.mk.ac,mk.f,mk.a,mk.r)}
+    </div>
+    <div style="${slSt}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">😴</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${cc.sl.ic}">Sommeil total</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${cc.tx};line-height:1.1">${sl.v}</div>
+            ${chk(cc,sl.r)}
+          </div>
+        </div>
+        <button style="width:30px;height:30px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;background:${cc.cta};color:${cc.sl.ic}">+</button>
+      </div>
+      ${pBar(cc,cc.sl.ac,sl.f,sl.a,sl.r)}
+    </div>
+    ${dtSec(cc)}`;
+}
+
+// ===================== VC — SOUS-BOIS + HERO ÉLEVÉ =====================
+// Même cards. Hero: gradient olive + forte élévation (ombres multi-couches), pas de border.
+function renderVC(cc,m,mk,sl,isSl) {
+  const n = isN();
+  const heroSt = isSl
+    ? `background:linear-gradient(160deg, ${cc.hg1}ee, ${cc.hg3});box-shadow:0 2px 6px ${cc.hg3}30, 0 8px 20px ${cc.hg3}25, 0 16px 40px ${cc.hg3}15;transform:translateY(-1px)`
+    : `background:linear-gradient(160deg, ${cc.hg1}, ${cc.hg2}dd);box-shadow:0 2px 4px ${cc.hg2}20, 0 6px 16px ${cc.hg2}18, 0 14px 36px ${cc.hg2}10`;
+  const heroNight = `background:linear-gradient(155deg, ${cc.hg1}, ${cc.hg3});box-shadow:0 2px 6px ${cc.hg3}35, 0 8px 22px ${cc.hg3}25, 0 18px 44px ${cc.hg3}18;transform:translateY(-1px)`;
+
+  if (isNM()) return `${hdr(cc,m)}
+    <button style="width:100%;text-align:center;cursor:pointer;font-family:inherit;position:relative;border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;border:none;${heroNight}">
+      <div style="font-size:28px;margin-bottom:3px">${m.e}</div>
+      <div style="font-size:13px;font-weight:700;color:#fff">${m.tx}</div>
+      <div style="font-size:36px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px">${m.tm}</div>
+      <div style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.55);margin-top:2px">${m.s}</div>
+      <div class="pd" style="background:#fff;position:absolute;top:13px;right:13px;box-shadow:0 0 10px rgba(255,255,255,0.3)"></div>
+    </button>
+    ${nightBottom(cc)}`;
+
+  return `${hdr(cc,m)}
+    <button style="width:100%;text-align:center;cursor:pointer;font-family:inherit;position:relative;border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;border:none;${heroSt}">
+      <div style="font-size:28px;margin-bottom:3px">${m.e}</div>
+      <div style="font-size:13px;font-weight:700;color:#fff">${m.tx}</div>
+      <div style="font-size:36px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px">${m.tm}</div>
+      <div style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.55);margin-top:2px">${m.s}</div>
+      ${isSl?`<div class="pd" style="background:#fff;position:absolute;top:13px;right:13px;box-shadow:0 0 10px rgba(255,255,255,0.3)"></div>`:''}
+    </button>
+    ${kpiCards(cc,mk,sl,n)}
+    ${dtSec(cc)}`;
+}
+
+// ===================== STYLES =====================
+const defBg = (cc,n) => n ? `linear-gradient(170deg, ${cc.hg3}60, ${cc.bg}, ${cc.sl.bg}40)` : `linear-gradient(170deg, ${cc.sl.bg}80, ${cc.hg1}12, ${cc.bg}, ${cc.mk.bg}25)`;
+const defSh = (n) => n?'0 8px 34px rgba(0,0,0,0.5)':'0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)';
+
+const STYLES = [
+  { key:'V0', name:'Vanilla', desc:'Baseline — aplats, zéro effet',
+    render: renderV0,
+    pageBg: (cc,n) => cc.sf,
+    phoneSh: (n) => n?'0 8px 32px rgba(0,0,0,0.4)':'0 8px 32px rgba(0,0,0,0.1)' },
+  { key:'VC', name:'Élevé', desc:'Hero gradient + forte élévation multi-ombres (pas de border)',
+    render: renderVC,
+    pageBg: defBg, phoneSh: defSh },
+];
+
+// ===================== RENDER =====================
+function renderTopbar() {
+  const cc = gc(), n = isN();
+  const btnBg = n ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const btnC = n ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)';
+  const btnABg = n ? 'rgba(120,140,80,0.2)' : 'rgba(90,120,60,0.15)';
+  const btnAC = n ? '#98a878' : '#4a5a32';
+  const btnABd = n ? 'rgba(120,140,80,0.35)' : 'rgba(90,120,60,0.3)';
+  const sepC = n ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+  document.getElementById('topbar').innerHTML = `
+    <h1>Olive & Terre — Hero</h1><div class="cs" style="background:${sepC}"></div>
+    <div class="cg">${Object.keys(moments).map(k=>{
+      const a = cfg.moment===k;
+      return `<button class="cb" style="background:${a?btnABg:btnBg};color:${a?btnAC:btnC};border-color:${a?btnABd:'transparent'}" onclick="cfg.moment='${k}';render()">${moments[k].l}</button>`;
+    }).join('')}</div>
+    <div class="cs" style="background:${sepC}"></div>
+    <div class="cg">
+      ${['below','in','above'].map(s=>{
+        const a = cfg.milkStatus===s;
+        const lbl = s==='below'?'🍼↓':s==='in'?'🍼✓':'🍼↑';
+        return `<button class="cb" style="background:${a?btnABg:btnBg};color:${a?btnAC:btnC};border-color:${a?btnABd:'transparent'}" onclick="cfg.milkStatus='${s}';render()">${lbl}</button>`;
+      }).join('')}
+    </div>
+    <div class="cg">
+      ${['below','in','above'].map(s=>{
+        const a = cfg.sleepStatus===s;
+        const lbl = s==='below'?'😴↓':s==='in'?'😴✓':'😴↑';
+        return `<button class="cb" style="background:${a?btnABg:btnBg};color:${a?btnAC:btnC};border-color:${a?btnABd:'transparent'}" onclick="cfg.sleepStatus='${s}';render()">${lbl}</button>`;
+      }).join('')}
+    </div>`;
+}
+
+function render() {
+  const cc = gc(), m = mo(), n = isN();
+  const mk = mkD(), sl = slD();
+  const isSl = m.h === 'sleep';
+
+  document.body.style.background = n ? cc.bg : cc.sl.bg;
+  document.body.style.color = cc.tx;
+  const tb = document.querySelector('.top-bar');
+  tb.style.background = n ? `${cc.sf}dd` : 'rgba(255,255,255,0.85)';
+  tb.style.borderBottom = `1px solid ${cc.bd}`;
+
+  renderTopbar();
+
+  document.getElementById('phones').innerHTML = STYLES.map(S => {
+    const pg = S.pageBg(cc,n);
+    const content = S.render(cc,m,mk,sl,isSl);
+
+    return `<div class="pc">
+      <div class="pl" style="color:${cc.txS}">${S.key} — ${S.name}</div>
+      <div class="ps" style="color:${cc.txS}">${S.desc}</div>
+      <div class="pf" style="background:${pg};box-shadow:${S.phoneSh(n)}">
+        <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${n?'0.35':'0.08'});z-index:10"></div>
+        ${content}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
