@@ -84,6 +84,31 @@ Le tap sur la hero card déclenche une **confirm card** (toast) proposant l'acti
 - **Persistance** : l'état courant et l'heure de début sont sauvegardés localement. À la réouverture, l'app restaure l'état et recalcule la durée écoulée (ex. "Dort depuis 2h14")
 - **Pas de transitions automatiques** : l'app ne change jamais d'état toute seule — seul le parent déclenche les transitions via le tap sur la hero card
 
+## Hero card — Affichage post-import crèche
+
+### Problème
+
+Quand le dernier événement enregistré est un import crèche (pas d'heure précise, seulement un `moment` : "Matin" / "Midi" / "Après-midi"), la durée affichée ("Éveillé depuis X" / "Dort depuis X") n'a pas de sens — il n'y a pas de timestamp fiable pour calculer le temps écoulé.
+
+### Comportement
+
+- **Événement live** (avec `startTime` précis) : affichage normal — emoji + label + durée + subtitle.
+  - Ex. : `☀️ Éveillé depuis 2h14` / `Réveillé à 15h53`
+- **Événement import** (avec `moment` au lieu de `startTime`) : affichage **sans durée** — emoji + label seul, pas de compteur, pas de subtitle.
+  - Ex. : `☀️ Éveillé` / `😴 Dort`
+
+### Règle
+
+> La durée n'est affichée que si le dernier changement d'état possède un `startTime` précis. Sinon, seul le label d'état est affiché.
+
+Le passage à l'affichage normal se fait dès la prochaine transition live (tap sur hero card).
+
+### Maquette
+
+Cf. `design-reference.html` § Hero Card — Post-import crèche.
+
+---
+
 ## Seuils horaires
 
 Les seuils (6h, 17h, 5h, 8h, etc.) sont des valeurs par défaut raisonnables. Ils pourront être affinés avec l'usage réel, mais **pas de config utilisateur** — l'app doit être simple.
