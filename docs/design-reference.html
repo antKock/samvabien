@@ -81,19 +81,8 @@
     text-transform: uppercase; letter-spacing: 0.5px;
   }
   .confirm-card {
-    border-radius: 16px; padding: 14px 16px; width: 240px;
+    border-radius: 18px; padding: 16px 16px 18px; width: 240px;
     display: flex; align-items: center; gap: 10px;
-  }
-  .confirm-check {
-    width: 28px; height: 28px; border-radius: 50%; display: flex;
-    align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
-    color: #fff; flex-shrink: 0;
-  }
-  .confirm-text { font-size: 12px; font-weight: 800; }
-  .confirm-sub { font-size: 9px; font-weight: 600; margin-top: 1px; }
-  .confirm-alt {
-    font-size: 9px; font-weight: 700; border: none; border-radius: 8px;
-    padding: 5px 10px; cursor: pointer; margin-top: 8px; font-family: inherit;
   }
 
   .toast-wrap {
@@ -124,7 +113,7 @@
     width: 28px; height: 28px; border-radius: 50%; border: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-    padding: 0; line-height: 1; z-index: 2;
+    padding: 4px 0 0 0; line-height: 1; z-index: 2;
   }
   .toast-time-btn {
     width: 32px; height: 28px; border-radius: 8px; border: none;
@@ -155,6 +144,9 @@
 
 <h2 class="section-title">Toast — En contexte</h2>
 <div class="phones-row" id="toast-demo"></div>
+
+<h2 class="section-title">Time Picker — Rouleaux</h2>
+<div class="phones-row" id="picker-demo"></div>
 
 <script>
 const COLORS = {
@@ -368,37 +360,31 @@ document.getElementById('hero-flow').innerHTML = flowHtml;
 function confirmCard(colors, night, emoji, text, time, alt) {
   const bg = colors.sleep.bg;
   const border = colors.sleep.accent;
-  const check = colors.inRange.accent;
   const textC = colors.text;
-  const subC = colors.textSec;
-  const altBg = colors.surface;
   const btnBg = alpha(colors.sleep.accent, 0.15);
   const btnC = colors.sleep.icon;
 
   return `<div>
-    <div class="confirm-card" style="background:${bg};border:1.5px solid ${border};flex-direction:column;align-items:stretch;gap:8px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="confirm-check" style="background:${check}">✓</div>
-        <div style="flex:1">
-          <div class="confirm-text" style="color:${textC}">${emoji} ${text}</div>
-        </div>
+    <div class="confirm-card" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};flex-direction:column;align-items:stretch;gap:6px;position:relative">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC};top:8px;right:8px;width:24px;height:24px;font-size:12px">↩</button>
+      <div style="text-align:center;margin-bottom:4px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">${emoji} ${text}</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-        <button style="width:32px;height:28px;border-radius:8px;border:none;background:${btnBg};color:${btnC};font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">-1</button>
-        <div style="font-size:18px;font-weight:800;color:${textC};min-width:54px;text-align:center">${time}</div>
-        <button style="width:32px;height:28px;border-radius:8px;border:none;background:${btnBg};color:${btnC};font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">+1</button>
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">-1</button>
+        <div style="font-size:16px;font-weight:800;color:${textC};min-width:54px;text-align:center">${time}</div>
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">+1</button>
       </div>
-      <div style="font-size:8px;font-weight:600;color:${subC};text-align:center;opacity:0.6">maintenant · tap heure = éditer</div>
+      ${alt ? `<div style="text-align:center;margin-top:4px">
+        <button class="toast-alt" style="background:${btnBg};color:${btnC}">${alt}</button>
+      </div>` : ''}
     </div>
-    ${alt ? `<div style="text-align:center;margin-top:6px">
-      <button class="confirm-alt" style="background:${altBg};color:${subC}">${alt}</button>
-    </div>` : ''}
   </div>`;
 }
 
 const TRANSITIONS = [
   {
-    label: 'Éveillé → Sieste',
+    label: 'Éveillé → Sieste (6h–17h)',
     from: { emoji:'☀️', text:'Éveillé depuis', duration:'3h30', subtitle:'Réveillé à 10h30' },
     fromNight: false,
     confirm: { emoji:'😴', text:'Sieste démarrée', time:'14h07' },
@@ -414,7 +400,7 @@ const TRANSITIONS = [
     confirmNight: false,
   },
   {
-    label: 'Éveillé → Coucher',
+    label: 'Éveillé → Coucher (17h–23h)',
     from: { emoji:'☀️', text:'Éveillé depuis', duration:'4h00', subtitle:'Réveillé à 15h53' },
     fromNight: false,
     confirm: { emoji:'🌙', text:'Coucher démarré', time:'19h32' },
@@ -422,12 +408,20 @@ const TRANSITIONS = [
     confirmNight: true,
   },
   {
-    label: 'Nuit → Réveil nocturne',
+    label: 'Nuit → Réveil nocturne (19h–5h)',
     from: { emoji:'🌙', text:'Dort depuis', duration:'7h45', subtitle:'Couché à 19h30' },
     fromNight: true,
     confirm: { emoji:'🫣', text:'Réveil nocturne', time:'3h17' },
-    alt: null,
+    alt: 'Plutôt : ☀️ Réveil matin',
     confirmNight: true,
+  },
+  {
+    label: 'Nuit → Réveil matin (5h–8h)',
+    from: { emoji:'🌙', text:'Dort depuis', duration:'9h50', subtitle:'Couché à 19h30' },
+    fromNight: true,
+    confirm: { emoji:'☀️', text:'Bonjour !', time:'5h48' },
+    alt: 'Plutôt : 🫣 Réveil nocturne',
+    confirmNight: false,
   },
   {
     label: 'Réveil nocturne → Rendormi',
@@ -471,7 +465,7 @@ function toastOverlay(colors, night, emoji, text, time, alt) {
 
   return `<div class="toast-wrap">
     <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
-      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">✕</button>
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">↩</button>
       <div style="text-align:center;margin-bottom:14px">
         <div style="font-size:14px;font-weight:800;color:${textC}">${emoji} ${text}</div>
       </div>
@@ -502,6 +496,72 @@ const TOAST_VIEWS = [
 ];
 
 document.getElementById('toast-demo').innerHTML = TOAST_VIEWS.map(v => `
+  <div class="phone-col">
+    <div class="phone-label">${v.label}</div>
+    <div class="phone-frame" style="background:${v.bg};box-shadow:${v.shadow}">
+      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${v.notch});z-index:10"></div>
+      ${v.content}
+    </div>
+  </div>
+`).join('');
+// ===================== TIME PICKER — OPTIONS =====================
+
+function pickerWheels(colors, night, title, hoursData, minsData) {
+  const bg = colors.sleep.bg;
+  const border = colors.sleep.accent;
+  const textC = colors.text;
+  const btnBg = alpha(colors.sleep.accent, 0.15);
+  const btnC = colors.sleep.icon;
+  const cooldownColor = colors.sleep.accent;
+  const selBg = alpha(colors.sleep.accent, 0.13);
+
+  const wheelItem = (val, selected) => {
+    const op = selected ? '1' : '0.3';
+    const fw = selected ? '800' : '600';
+    const fs = selected ? '24px' : '15px';
+    return `<div style="font-size:${fs};font-weight:${fw};color:${textC};opacity:${op};padding:6px 0;text-align:center">${val}</div>`;
+  };
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">↩</button>
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">${title}</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;position:relative">
+        <div style="position:absolute;top:50%;left:16px;right:16px;height:38px;transform:translateY(-50%);background:${selBg};border-radius:12px;pointer-events:none"></div>
+        <div style="width:84px;overflow:hidden;position:relative;z-index:1">
+          <div style="position:absolute;inset:0;pointer-events:none;
+            background:linear-gradient(${bg}, transparent 28%, transparent 72%, ${bg});z-index:2"></div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            ${hoursData.map((h,i) => wheelItem(h+'h', i===2)).join('')}
+          </div>
+        </div>
+        <div style="font-size:24px;font-weight:800;color:${textC};align-self:center;opacity:0.3;z-index:1">:</div>
+        <div style="width:84px;overflow:hidden;position:relative;z-index:1">
+          <div style="position:absolute;inset:0;pointer-events:none;
+            background:linear-gradient(${bg}, transparent 28%, transparent 72%, ${bg});z-index:2"></div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            ${minsData.map((m,i) => wheelItem(m, i===2)).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;margin-top:4px">
+        <button style="background:${btnBg};color:${btnC};border:none;border-radius:10px;padding:8px 28px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">OK</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+const pickerLightContent = render(dayC, false) + pickerWheels(dayC, false, '😴 Sieste démarrée', [12,13,14,15,16], ['05','06','07','08','09']);
+const pickerDarkContent = render(nightC, true) + pickerWheels(nightC, true, '🫣 Réveil nocturne', [1,2,3,4,5], ['15','16','17','18','19']);
+
+const pickerViews = [
+  { label:'Light — Édition heure', content: pickerLightContent, bg: bgDay, shadow: '0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)', notch: '0.08' },
+  { label:'Dark — Édition heure', content: pickerDarkContent, bg: bgNight, shadow: '0 8px 34px rgba(0,0,0,0.5)', notch: '0.35' },
+];
+
+document.getElementById('picker-demo').innerHTML = pickerViews.map(v => `
   <div class="phone-col">
     <div class="phone-label">${v.label}</div>
     <div class="phone-frame" style="background:${v.bg};box-shadow:${v.shadow}">
