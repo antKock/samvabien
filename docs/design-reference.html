@@ -36,10 +36,6 @@
 
   .progress-track { width: 100%; height: 6px; border-radius: 3px; position: relative; margin-top: 6px; }
   .progress-fill { height: 100%; border-radius: 3px; position: absolute; left: 0; top: 0; }
-  .progress-marker {
-    position: absolute; top: -3px; width: 12px; height: 12px; border-radius: 50%;
-    transform: translateX(-50%); border: 2px solid; box-sizing: border-box;
-  }
 
   .sticky-nav {
     position: sticky; top: 0; z-index: 100; background: #f0efe8;
@@ -128,7 +124,7 @@
     width: 28px; height: 28px; border-radius: 50%; border: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-    padding: 4px 0 0 0; line-height: 1; z-index: 2;
+    padding: 0; line-height: 1; z-index: 2;
   }
   .toast-time-btn {
     width: 32px; height: 28px; border-radius: 8px; border: none;
@@ -142,6 +138,32 @@
     font-size: 11px; font-weight: 700; border: none; border-radius: 8px;
     padding: 6px 12px; cursor: pointer; font-family: inherit;
   }
+  .toast-slider-wrap {
+    position: relative; margin: 54px 0 4px; padding: 0 4px;
+  }
+  .toast-slider-track {
+    height: 6px; border-radius: 3px; position: relative;
+  }
+  .toast-slider-fill {
+    position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px;
+  }
+  .toast-slider-thumb {
+    position: absolute; top: -9px; width: 24px; height: 24px; border-radius: 50%;
+    transform: translateX(-50%); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toast-slider-label {
+    position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; font-weight: 800; white-space: nowrap;
+  }
+  .toast-moment-btn {
+    border: none; border-radius: 10px; padding: 7px 14px;
+    font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .toast-action-btn {
+    border: none; border-radius: 10px; padding: 9px 20px;
+    font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit;
+  }
 </style>
 </head>
 <body>
@@ -154,6 +176,8 @@
   <a href="#s-transitions">Transitions</a>
   <a href="#s-toast">Toast</a>
   <a href="#s-picker">Time Picker</a>
+  <a href="#s-kpi-var">KPI Variations</a>
+  <a href="#s-toast-kpi">Toast KPI</a>
 </nav>
 
 <h2 class="section-title" id="s-vue">Vue complète</h2>
@@ -171,12 +195,18 @@
 <h2 class="section-title" id="s-picker">Time Picker — Rouleaux</h2>
 <div class="phones-row" id="picker-demo"></div>
 
+<h2 class="section-title" id="s-kpi-var">KPI Cards — Variations Progress Bar</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="kpi-variations"></div>
+
+<h2 class="section-title" id="s-toast-kpi">Toast KPI — Biberon & Import</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="toast-kpi-demo"></div>
+
 <script>
 const COLORS = {
   day: {
     bg:'#f6f5ee', surface:'#ffffff', text:'#32321e', textSec:'#8a8870',
-    sleep:   { bg:'#eaecda', accent:'#8a9a6a', icon:'#6a7a4a' },
-    milk:    { bg:'#f5e6d6', accent:'#c08a60', icon:'#a06840' },
+    sleep:   { bg:'#eaecda', accent:'#8a9a6a', icon:'#6a7a4a', rangeBg:'rgba(120,130,80,0.15)', rangeBorder:'rgba(120,130,80,0.28)', inRange:'#8a9a5a' },
+    milk:    { bg:'#f5e6d6', accent:'#c08a60', icon:'#a06840', rangeBg:'rgba(180,130,80,0.15)', rangeBorder:'rgba(180,130,80,0.28)', inRange:'#c0945a' },
     hero:    { text:'#4a5a32' },
     inRange: { accent:'#8a9a5a' },
     rangeBg:'rgba(120,130,80,0.15)', rangeBorder:'rgba(120,130,80,0.28)',
@@ -187,13 +217,13 @@ const COLORS = {
   },
   night: {
     bg:'#181810', surface:'#22221a', text:'#c8c8b0', textSec:'#7a7a60',
-    sleep:   { bg:'#222818', accent:'#7a8a5a', icon:'#98a878' },
-    milk:    { bg:'#261e14', accent:'#b08050', icon:'#cca070' },
+    sleep:   { bg:'#222818', accent:'#7a8a5a', icon:'#98a878', rangeBg:'rgba(120,140,70,0.15)', rangeBorder:'rgba(130,150,80,0.25)', inRange:'#7a8a4a' },
+    milk:    { bg:'#261e14', accent:'#b08050', icon:'#cca070', rangeBg:'rgba(160,120,60,0.15)', rangeBorder:'rgba(170,130,70,0.25)', inRange:'#b08a4a' },
     hero:    { text:'#98a878' },
     inRange: { accent:'#7a8a4a' },
-    rangeBg:'rgba(100,110,60,0.2)', rangeBorder:'rgba(100,110,60,0.3)',
+    rangeBg:'rgba(120,140,70,0.15)', rangeBorder:'rgba(130,150,80,0.25)',
     border:'rgba(255,255,255,0.06)',
-    track:'#222618',
+    track:'#3e402e',
     heroG1:'#4a5434', heroG3:'#1a2210',
     pageBg1:'#3a4228', pageBg3:'#222c16',
   }
@@ -210,18 +240,24 @@ const alpha = (hex, a) => {
   return `rgba(${r},${g},${b},${a})`;
 };
 
-function checkmark(colors, inRange) {
+/* Progress bar — terminologie :
+   bar-track : rail vide | bar-fill : progression | bar-now : position actuelle (plein)
+   bar-target : zone recommandation médicale | bar-avg : moyenne 3j (anneau creux) */
+
+function checkmark(colors, cat, inRange) {
   if (!inRange) return '';
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:${colors.inRange.accent};color:#fff;font-size:9px;font-weight:800">✓</span>`;
+  const c = colors[cat];
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:${c.inRange};color:#fff;font-size:9px;font-weight:800">✓</span>`;
 }
 
-function progressBar(colors, catColor, fillPct, avgPct, inRange) {
-  const fillColor = inRange ? colors.inRange.accent : catColor;
+function progressBar(colors, cat, fillPct, avgPct, inRange) {
+  const c = colors[cat];
+  const fillColor = c.inRange;
   return `<div class="progress-track" style="background:${colors.track}">
-    <div style="position:absolute;left:52%;width:36%;height:100%;background:${colors.rangeBg};border-radius:3px;border:1px solid ${colors.rangeBorder}"></div>
-    <div class="progress-fill" style="width:${fillPct}%;background:${fillColor};opacity:${inRange?0.8:0.5}"></div>
-    <div class="progress-marker" style="left:${avgPct}%;background:${colors.rangeBorder};border-color:${colors.rangeBorder}"></div>
-    <div style="position:absolute;top:-2px;left:${fillPct}%;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:${colors.surface};box-shadow:0 0 0 1.5px ${fillColor}"></div>
+    <div style="position:absolute;left:52%;width:36%;height:100%;background:${c.rangeBg};border-radius:3px;border:1px solid ${c.rangeBorder}"></div>
+    <div class="progress-fill" style="width:${fillPct}%;background:${fillColor};opacity:0.8"></div>
+    <div style="position:absolute;top:-2px;left:${avgPct}%;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:${colors.track};border:2px solid ${c.rangeBorder};box-sizing:border-box"></div>
+    <div style="position:absolute;top:-2px;left:${fillPct}%;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);background:${fillColor};box-shadow:0 1px 3px ${alpha(fillColor,0.3)}"></div>
   </div>`;
 }
 
@@ -256,6 +292,14 @@ function detailSection(colors) {
   </div></div>`;
 }
 
+function importIcon(color) {
+  return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 1.5V9" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M4.5 6.5L7 9L9.5 6.5" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2 10.5V11.5C2 12 2.5 12.5 3 12.5H11C11.5 12.5 12 12 12 11.5V10.5" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
 function kpiCards(colors, night) {
   const milkStyle = night
     ? `background:linear-gradient(165deg, ${colors.milk.bg}, ${alpha(colors.milk.accent,0.06)});border:1px solid ${alpha(colors.milk.accent,0.08)};border-bottom:2.5px solid ${alpha(colors.milk.accent,0.38)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${alpha(colors.milk.accent,0.06)}`
@@ -263,7 +307,7 @@ function kpiCards(colors, night) {
   const sleepStyle = night
     ? `background:linear-gradient(165deg, ${colors.sleep.bg}, ${alpha(colors.sleep.accent,0.06)});border:1px solid ${alpha(colors.sleep.accent,0.08)};border-bottom:2.5px solid ${alpha(colors.sleep.accent,0.38)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${alpha(colors.sleep.accent,0.06)}`
     : `background:linear-gradient(165deg, ${colors.sleep.bg}, ${alpha(colors.sleep.accent,0.03)});border:1px solid ${alpha(colors.sleep.accent,0.06)};border-bottom:2.5px solid ${alpha(colors.sleep.accent,0.25)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 3px 12px ${alpha(colors.sleep.accent,0.02)}`;
-  const ctaStyle = (ic) => `width:30px;height:30px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;background:${alpha(ic,0.08)};color:${ic};box-shadow:inset 0 1px 0 rgba(255,255,255,${night?'0.05':'0.2'}), 0 2px 4px ${alpha(ic,0.06)}`;
+  const ctaStyle = (ic) => `display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;border:none;cursor:pointer;background:${alpha(ic,0.08)};box-shadow:inset 0 1px 0 rgba(255,255,255,${night?'0.05':'0.2'}), 0 2px 4px ${alpha(ic,0.06)}`;
 
   return `
     <div style="border-radius:18px;padding:11px 11px 11px 14px;margin-bottom:8px;${milkStyle}">
@@ -273,26 +317,26 @@ function kpiCards(colors, night) {
           <div style="font-size:8px;font-weight:600;color:${colors.milk.icon}">Lait aujourd'hui</div>
           <div style="display:flex;align-items:center;gap:4px">
             <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${milk.value}</div>
-            ${checkmark(colors,milk.inRange)}
+            ${checkmark(colors,'milk',milk.inRange)}
           </div>
         </div>
-        <button style="${ctaStyle(colors.milk.icon)}">+</button>
+        <button style="${ctaStyle(colors.milk.icon)}">${importIcon(colors.milk.icon)}</button>
       </div>
-      ${progressBar(colors,colors.milk.accent,milk.fill,milk.avg,milk.inRange)}
+      ${progressBar(colors,'milk',milk.fill,milk.avg,milk.inRange)}
     </div>
     <div style="border-radius:18px;padding:11px 11px 11px 14px;margin-bottom:10px;${sleepStyle}">
       <div style="display:flex;align-items:center;gap:8px">
         <div style="font-size:16px">😴</div>
         <div style="flex:1">
-          <div style="font-size:8px;font-weight:600;color:${colors.sleep.icon}">Sommeil total</div>
+          <div style="font-size:8px;font-weight:600;color:${colors.sleep.icon}">Sommeil aujourd'hui</div>
           <div style="display:flex;align-items:center;gap:4px">
             <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${sleep.value}</div>
-            ${checkmark(colors,sleep.inRange)}
+            ${checkmark(colors,'sleep',sleep.inRange)}
           </div>
         </div>
-        <button style="${ctaStyle(colors.sleep.icon)}">+</button>
+        <button style="${ctaStyle(colors.sleep.icon)}">${importIcon(colors.sleep.icon)}</button>
       </div>
-      ${progressBar(colors,colors.sleep.accent,sleep.fill,sleep.avg,sleep.inRange)}
+      ${progressBar(colors,'sleep',sleep.fill,sleep.avg,sleep.inRange)}
     </div>`;
 }
 
@@ -487,7 +531,7 @@ function toastOverlay(colors, night, emoji, text, time, alt) {
 
   return `<div class="toast-wrap">
     <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
-      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">↩</button>
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC};padding-top:4px">↩</button>
       <div style="text-align:center;margin-bottom:14px">
         <div style="font-size:14px;font-weight:800;color:${textC}">${emoji} ${text}</div>
       </div>
@@ -541,7 +585,7 @@ function pickerWheels(colors, night, title, hoursData, minsData) {
 
   return `<div class="toast-wrap">
     <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
-      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">↩</button>
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC};padding-top:4px">↩</button>
       <div style="text-align:center;margin-bottom:14px">
         <div style="font-size:14px;font-weight:800;color:${textC}">${title}</div>
       </div>
@@ -587,6 +631,215 @@ document.getElementById('picker-demo').innerHTML = pickerViews.map(v => `
     </div>
   </div>
 `).join('');
+
+// ===================== KPI CARDS — RENDU FINAL =====================
+
+// Données "in range" (actuel) et "sous la target"
+const milkLow  = { value:'210 mL', fill:24, avg:28, inRange:false };
+const sleepLow = { value:'8h10',   fill:35, avg:32, inRange:false };
+
+function kpiCardsWithData(colors, night, milkData, sleepData) {
+  const milkStyle = night
+    ? `background:linear-gradient(165deg, ${colors.milk.bg}, ${alpha(colors.milk.accent,0.06)});border:1px solid ${alpha(colors.milk.accent,0.08)};border-bottom:2.5px solid ${alpha(colors.milk.accent,0.38)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${alpha(colors.milk.accent,0.06)}`
+    : `background:linear-gradient(165deg, ${colors.milk.bg}, ${alpha(colors.milk.accent,0.03)});border:1px solid ${alpha(colors.milk.accent,0.06)};border-bottom:2.5px solid ${alpha(colors.milk.accent,0.25)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 3px 12px ${alpha(colors.milk.accent,0.02)}`;
+  const sleepStyle = night
+    ? `background:linear-gradient(165deg, ${colors.sleep.bg}, ${alpha(colors.sleep.accent,0.06)});border:1px solid ${alpha(colors.sleep.accent,0.08)};border-bottom:2.5px solid ${alpha(colors.sleep.accent,0.38)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 12px ${alpha(colors.sleep.accent,0.06)}`
+    : `background:linear-gradient(165deg, ${colors.sleep.bg}, ${alpha(colors.sleep.accent,0.03)});border:1px solid ${alpha(colors.sleep.accent,0.06)};border-bottom:2.5px solid ${alpha(colors.sleep.accent,0.25)};box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 3px 12px ${alpha(colors.sleep.accent,0.02)}`;
+  const ctaStyle = (ic) => `display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;border:none;cursor:pointer;background:${alpha(ic,0.08)};box-shadow:inset 0 1px 0 rgba(255,255,255,${night?'0.05':'0.2'}), 0 2px 4px ${alpha(ic,0.06)}`;
+
+  return `
+    <div style="border-radius:18px;padding:11px 11px 11px 14px;margin-bottom:8px;${milkStyle}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">🍼</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${colors.milk.icon}">Lait aujourd'hui</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${milkData.value}</div>
+            ${checkmark(colors,'milk',milkData.inRange)}
+          </div>
+        </div>
+        <button style="${ctaStyle(colors.milk.icon)}">${importIcon(colors.milk.icon)}</button>
+      </div>
+      ${progressBar(colors,'milk',milkData.fill,milkData.avg,milkData.inRange)}
+    </div>
+    <div style="border-radius:18px;padding:11px 11px 11px 14px;${sleepStyle}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:16px">😴</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:600;color:${colors.sleep.icon}">Sommeil aujourd'hui</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${sleepData.value}</div>
+            ${checkmark(colors,'sleep',sleepData.inRange)}
+          </div>
+        </div>
+        <button style="${ctaStyle(colors.sleep.icon)}">${importIcon(colors.sleep.icon)}</button>
+      </div>
+      ${progressBar(colors,'sleep',sleepData.fill,sleepData.avg,sleepData.inRange)}
+    </div>`;
+}
+
+function kpiPhoneWrap(colors, night, label, milkData, sleepData) {
+  const bg = night ? bgNight : bgDay;
+  const shadow = night ? '0 8px 34px rgba(0,0,0,0.5)' : '0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)';
+  const notch = night ? '0.35' : '0.08';
+  return `<div class="phone-col">
+    <div class="phone-label">${label}</div>
+    <div class="phone-frame" style="background:${bg};box-shadow:${shadow};aspect-ratio:auto;padding:20px 0">
+      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${notch});z-index:10"></div>
+      <div class="phone-inner" style="padding-top:30px">
+        ${kpiCardsWithData(colors, night, milkData, sleepData)}
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('kpi-variations').innerHTML = `
+  <div class="phones-row">
+    ${kpiPhoneWrap(dayC, false, 'Light — In range ✓', milk, sleep)}
+    ${kpiPhoneWrap(nightC, true, 'Dark — In range ✓', milk, sleep)}
+    ${kpiPhoneWrap(dayC, false, 'Light — Sous la target', milkLow, sleepLow)}
+    ${kpiPhoneWrap(nightC, true, 'Dark — Sous la target', milkLow, sleepLow)}
+  </div>`;
+
+// ===================== TOAST KPI — BIBERON & IMPORT =====================
+
+function milkSlider(colors, cat, value, pct) {
+  const c = colors[cat];
+  return `<div class="toast-slider-wrap">
+    <div class="toast-slider-track" style="background:${alpha(c.accent,0.15)}">
+      <div class="toast-slider-fill" style="width:${pct}%;background:${c.inRange};opacity:0.7;border-radius:3px"></div>
+      <div class="toast-slider-thumb" style="left:${pct}%;background:${c.inRange}">
+        <div class="toast-slider-label" style="color:${colors.text}">${value}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Toast biberon — mode live (tap sur carte lait)
+function toastMilkLive(colors, night) {
+  const c = colors.milk;
+  const bg = c.bg;
+  const border = c.accent;
+  const textC = colors.text;
+  const btnBg = alpha(c.accent, 0.15);
+  const btnC = c.icon;
+  const cooldownColor = c.accent;
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC};padding-top:4px">↩</button>
+      <div style="text-align:center;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">🍼 Biberon</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">-1</button>
+        <div style="font-size:16px;font-weight:800;color:${textC};min-width:54px;text-align:center">14h07</div>
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">+1</button>
+      </div>
+      ${milkSlider(colors, 'milk', '180 mL', 60)}
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding:0 2px">
+        <div style="font-size:9px;color:${colors.textSec}">90 mL</div>
+        <div style="font-size:9px;color:${colors.textSec}">300 mL</div>
+      </div>
+      <div class="toast-cooldown"></div>
+    </div>
+  </div>`;
+}
+
+// Toast batch — mode import (tap sur CTA import)
+function toastBatchMilk(colors, night, selectedMoment) {
+  const c = colors.milk;
+  const bg = c.bg;
+  const border = c.accent;
+  const textC = colors.text;
+  const btnBg = alpha(c.accent, 0.15);
+  const btnC = c.icon;
+  const moments = ['Matin', 'Midi', 'Après-midi'];
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)}">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">✕</button>
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">🍼 Import biberon</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:14px">
+        ${moments.map(m => `<button class="toast-moment-btn" style="background:${m===selectedMoment ? c.inRange : btnBg};color:${m===selectedMoment ? '#fff' : btnC};${m===selectedMoment ? 'box-shadow:0 2px 6px '+alpha(c.inRange,0.3) : ''}">${m}</button>`).join('')}
+      </div>
+      ${milkSlider(colors, 'milk', '180 mL', 60)}
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding:0 2px">
+        <div style="font-size:9px;color:${colors.textSec}">90 mL</div>
+        <div style="font-size:9px;color:${colors.textSec}">300 mL</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:14px">
+        <button class="toast-action-btn" style="background:${btnBg};color:${btnC}">Suivant</button>
+        <button class="toast-action-btn" style="background:${c.inRange};color:#fff;box-shadow:0 2px 6px ${alpha(c.inRange,0.3)}">Terminer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toastBatchSleep(colors, night, selectedMoment) {
+  const c = colors.sleep;
+  const bg = c.bg;
+  const border = c.accent;
+  const textC = colors.text;
+  const btnBg = alpha(c.accent, 0.15);
+  const btnC = c.icon;
+  const moments = ['Matin', 'Midi', 'Après-midi'];
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)}">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">✕</button>
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">😴 Import sieste</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:14px">
+        ${moments.map(m => `<button class="toast-moment-btn" style="background:${m===selectedMoment ? c.inRange : btnBg};color:${m===selectedMoment ? '#fff' : btnC};${m===selectedMoment ? 'box-shadow:0 2px 6px '+alpha(c.inRange,0.3) : ''}">${m}</button>`).join('')}
+      </div>
+      ${milkSlider(colors, 'sleep', '45 min', 55)}
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding:0 2px">
+        <div style="font-size:9px;color:${colors.textSec}">15 min</div>
+        <div style="font-size:9px;color:${colors.textSec}">2h00</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:14px">
+        <button class="toast-action-btn" style="background:${btnBg};color:${btnC}">Suivant</button>
+        <button class="toast-action-btn" style="background:${c.inRange};color:#fff;box-shadow:0 2px 6px ${alpha(c.inRange,0.3)}">Terminer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toastKpiPhoneWrap(colors, night, label, toastContent, milkData, sleepData) {
+  const bg = night ? bgNight : bgDay;
+  const shadow = night ? '0 8px 34px rgba(0,0,0,0.5)' : '0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)';
+  const notch = night ? '0.35' : '0.08';
+  const pageContent = render(colors, night);
+  return `<div class="phone-col">
+    <div class="phone-label">${label}</div>
+    <div class="phone-frame" style="background:${bg};box-shadow:${shadow}">
+      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${notch});z-index:10"></div>
+      ${pageContent}
+      ${toastContent}
+    </div>
+  </div>`;
+}
+
+document.getElementById('toast-kpi-demo').innerHTML = `
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:0 0 8px">Mode live — Tap carte lait</h3>
+  <div class="phones-row">
+    ${toastKpiPhoneWrap(dayC, false, 'Light — Biberon live', toastMilkLive(dayC, false), milk, sleep)}
+    ${toastKpiPhoneWrap(nightC, true, 'Dark — Biberon live', toastMilkLive(nightC, true), milk, sleep)}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Mode batch — Import lait (crèche)</h3>
+  <div class="phones-row">
+    ${toastKpiPhoneWrap(dayC, false, 'Light — Import lait', toastBatchMilk(dayC, false, null), milk, sleep)}
+    ${toastKpiPhoneWrap(nightC, true, 'Dark — Import lait', toastBatchMilk(nightC, true, null), milk, sleep)}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Mode batch — Import sommeil (crèche)</h3>
+  <div class="phones-row">
+    ${toastKpiPhoneWrap(dayC, false, 'Light — Import sieste', toastBatchSleep(dayC, false, null), milk, sleep)}
+    ${toastKpiPhoneWrap(nightC, true, 'Dark — Import sieste', toastBatchSleep(nightC, true, null), milk, sleep)}
+  </div>`;
 </script>
 </body>
 </html>
