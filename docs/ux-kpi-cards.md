@@ -81,6 +81,7 @@ Deux cartes KPI sous la hero card : **Lait** 🍼 et **Sommeil** 😴. Chacune a
 - Range du slider : bornes calculées selon le **poids** du bébé.
 - Tap sur l'heure → time picker (composant partagé avec la hero card).
 - **Cooldown 5s** → auto-confirm. Si le parent ne modifie rien, la valeur par défaut (moyenne des 10 derniers biberons) est confirmée automatiquement.
+- **Tap hors toast** : équivaut à l'expiration — valide le biberon et ferme le toast.
 - **Bouton ↩** (annuler) : annule l'action en cours, le biberon n'est pas enregistré.
 - Pas de bouton alt.
 - *🎬 Animation potentielle : confirmation biberon*
@@ -94,6 +95,7 @@ Le CTA `+` ouvre un mode de saisie multiple pour importer les données communiqu
 **Flow** :
 - Même composant toast visuellement, mais **sans cooldown**.
 - **Bouton ✕** (fermer) : ferme le toast sans enregistrer l'entrée en cours. Les entrées déjà ajoutées via "Suivant" restent enregistrées.
+- **Tap hors toast** : même effet que ✕ — annule l'entrée en cours sans enregistrer. Les entrées déjà ajoutées via "Suivant" restent enregistrées.
 - Sélection **optionnelle** du **moment de la journée** : Matin / Midi / Après-midi (~8h–18h, découpage exact à affiner). Aucun créneau pré-sélectionné par défaut ; la valeur peut rester vide (= "au cours de la journée", sans précision).
 - **Lait** : slider volume, même défaut (moyenne 10 derniers). Fallback = **médiane de la range**.
 - **Sommeil** : slider durée, défaut = moyenne des 10 dernières siestes. Fallback = **médiane de la range**.

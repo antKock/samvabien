@@ -6,13 +6,8 @@
 <title>samvabien — Light / Dark</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-  /* Intent: anime le cooldown en conic-gradient (CSS-only).
+  /* Intent: anime le cooldown en SVG stroke-dashoffset (CSS-only).
      L'implémentation mobile (React Native / Expo) utilisera un mécanisme différent. */
-  @property --cd {
-    syntax: '<angle>';
-    initial-value: 360deg;
-    inherits: false;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; scroll-padding-top: 48px; }
   body { font-family: 'Nunito', system-ui, -apple-system, sans-serif; background: #f0efe8; }
@@ -109,15 +104,18 @@
     100% { opacity: 1; transform: translateY(0); filter: saturate(1) brightness(1); }
   }
   .toast-cooldown {
-    position: absolute; inset: -1px; border-radius: 18px; pointer-events: none; z-index: 1;
-    border: 2.5px solid var(--cooldown-color);
-    -webkit-mask: conic-gradient(from 0deg at 50% 50%, #000 0deg, #000 var(--cd), transparent var(--cd));
-    mask: conic-gradient(from 0deg at 50% 50%, #000 0deg, #000 var(--cd), transparent var(--cd));
-    animation: cooldown-clock 5s linear forwards;
+    position: absolute; inset: -1px; pointer-events: none; z-index: 1;
+    overflow: visible;
   }
-  @keyframes cooldown-clock {
-    from { --cd: 360deg; }
-    to   { --cd: 0deg; }
+  .toast-cooldown path {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    animation: cooldown-stroke 5s linear forwards;
+  }
+  @keyframes cooldown-stroke {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: var(--perim); }
   }
   .toast-cancel {
     position: absolute; top: 10px; right: 10px;
@@ -178,6 +176,7 @@
   <a href="#s-picker">Time Picker</a>
   <a href="#s-kpi-var">KPI Variations</a>
   <a href="#s-toast-kpi">Toast KPI</a>
+  <a href="#s-recap">Récap</a>
 </nav>
 
 <h2 class="section-title" id="s-vue">Vue complète</h2>
@@ -200,6 +199,9 @@
 
 <h2 class="section-title" id="s-toast-kpi">Toast KPI — Biberon & Import</h2>
 <div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="toast-kpi-demo"></div>
+
+<h2 class="section-title" id="s-recap">Récap Aujourd'hui</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="recap-demo"></div>
 
 <script>
 const COLORS = {
@@ -240,6 +242,15 @@ const alpha = (hex, a) => {
   return `rgba(${r},${g},${b},${a})`;
 };
 
+/* Cooldown SVG — génère un <svg> path avec stroke-dashoffset animé.
+   Le path trace un rect arrondi en partant du milieu du bord top.
+   Le périmètre est calculé post-rendu par initCooldowns(). */
+function cooldownSVG(color, durationS = 5) {
+  return `<svg class="toast-cooldown" data-cooldown-color="${color}" data-cooldown-duration="${durationS}">
+    <path />
+  </svg>`;
+}
+
 /* Progress bar — terminologie :
    bar-track : rail vide | bar-fill : progression | bar-now : position actuelle (plein)
    bar-target : zone recommandation médicale | bar-avg : moyenne 3j (anneau creux)
@@ -262,33 +273,47 @@ function progressBar(colors, cat, fillPct, avgPct, inRange) {
   </div>`;
 }
 
+// ===================== RÉCAP — DONNÉES & RENDU PARTAGÉ =====================
+
+const RECAP_EVENTS = [
+  { type:'nap',         dot:'sleep', label:'Sieste',           time:'14h30',       value:'1h23' },
+  { type:'bottle',      dot:'milk',  label:'Biberon',          time:'12h15',       value:'150 mL' },
+  { type:'bottle',      dot:'milk',  label:'Biberon',          time:'matin',       value:'180 mL' },
+  { type:'nap',         dot:'sleep', label:'Sieste',           time:'matin',       value:'1h00' },
+  { type:'night-wake',  dot:'sleep', label:'Réveil nocturne',  time:'3h15–3h27',   value:'12min' },
+  { type:'night',       dot:'sleep', label:'Nuit',             time:'19h30–5h50',  value:'10h20' },
+];
+
+function recapRows(colors, events) {
+  return events.map(e => {
+    const dotColor = colors[e.dot].accent;
+    const valColor = colors[e.dot].icon;
+    return `<div style="border-bottom:1px solid ${colors.border}">
+      <div style="display:flex;align-items:center;gap:7px;padding:7px 0">
+        <div style="width:5px;height:5px;border-radius:50%;background:${dotColor}"></div>
+        <div style="font-size:11px;font-weight:600;color:${colors.text};flex:1">${e.label}</div>
+        <div style="font-size:10px;font-weight:600;color:${colors.textSec};width:68px;text-align:right">${e.time}</div>
+        <div style="font-size:11px;font-weight:700;color:${e.value ? valColor : 'transparent'};width:48px">${e.value || '—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function detailRows(colors) {
-  const items = [
-    { dot:colors.sleep.accent, label:'Sieste',  time:'14h30',      value:'1h23',   color:colors.sleep.icon },
-    { dot:colors.milk.accent,  label:'Biberon', time:'12h15',      value:'150 mL', color:colors.milk.icon },
-    { dot:colors.sleep.accent, label:'Sieste',  time:'matin',      value:'1h00',   color:colors.sleep.icon },
-    { dot:colors.milk.accent,  label:'Biberon', time:'matin',      value:'180 mL', color:colors.milk.icon },
-    { dot:colors.sleep.accent, label:'Nuit',    time:'19h30→5h50', value:'10h20',  color:colors.sleep.icon },
-  ];
-  return items.map(i=>`<div style="border-bottom:1px solid ${colors.border}"><div style="display:flex;align-items:center;gap:7px;padding:6px 0">
-    <div style="width:5px;height:5px;border-radius:50%;background:${i.dot}"></div>
-    <div style="font-size:10px;font-weight:600;color:${colors.text};flex:1">${i.label}</div>
-    <div style="font-size:9px;font-weight:600;color:${colors.textSec};width:60px;text-align:right">${i.time}</div>
-    <div style="font-size:10px;font-weight:700;color:${i.color};width:46px">${i.value}</div>
-  </div></div>`).join('');
+  return recapRows(colors, RECAP_EVENTS);
 }
 
 function headerHtml(colors) {
   return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
   <div class="phone-inner">
     <div style="padding:2px 0 6px">
-      <div style="font-size:9px;font-weight:600;color:${colors.textSec}">Vendredi 7 mars</div>
+      <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Vendredi 7 mars</div>
     </div>`;
 }
 
 function detailSection(colors) {
-  return `<div style="border-top:1px solid ${colors.border};padding-top:8px">
-    <div style="font-size:8px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">Aujourd'hui</div>
+  return `<div style="padding-top:8px;margin-top:6px">
+    <div style="font-size:9px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">Aujourd'hui</div>
     ${detailRows(colors)}
   </div></div>`;
 }
@@ -496,7 +521,7 @@ function toastOverlay(colors, night, emoji, text, time, alt) {
   const cooldownColor = colors.sleep.accent;
 
   return `<div class="toast-wrap">
-    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)}">
       <button class="toast-cancel" style="background:${btnBg};color:${btnC};padding-top:4px">↩</button>
       <div style="text-align:center;margin-bottom:14px">
         <div style="font-size:14px;font-weight:800;color:${textC}">${emoji} ${text}</div>
@@ -509,7 +534,7 @@ function toastOverlay(colors, night, emoji, text, time, alt) {
       ${alt ? `<div style="text-align:center;margin-top:10px">
         <button class="toast-alt" style="background:${btnBg};color:${btnC}">${alt}</button>
       </div>` : ''}
-      <div class="toast-cooldown"></div>
+      ${cooldownSVG(cooldownColor)}
     </div>
   </div>`;
 }
@@ -618,7 +643,7 @@ function kpiCardsWithData(colors, night, milkData, sleepData) {
       <div style="display:flex;align-items:center;gap:8px">
         <div style="font-size:16px">🍼</div>
         <div style="flex:1">
-          <div style="font-size:8px;font-weight:600;color:${colors.milk.icon}">Lait aujourd'hui</div>
+          <div style="font-size:9px;font-weight:600;color:${colors.milk.icon}">Lait aujourd'hui</div>
           <div style="display:flex;align-items:center;gap:4px">
             <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${milkData.value}</div>
             ${checkmark(colors,'milk',milkData.inRange)}
@@ -632,7 +657,7 @@ function kpiCardsWithData(colors, night, milkData, sleepData) {
       <div style="display:flex;align-items:center;gap:8px">
         <div style="font-size:16px">😴</div>
         <div style="flex:1">
-          <div style="font-size:8px;font-weight:600;color:${colors.sleep.icon}">Sommeil aujourd'hui</div>
+          <div style="font-size:9px;font-weight:600;color:${colors.sleep.icon}">Sommeil aujourd'hui</div>
           <div style="display:flex;align-items:center;gap:4px">
             <div style="font-size:22px;font-weight:800;color:${colors.text};line-height:1.1">${sleepData.value}</div>
             ${checkmark(colors,'sleep',sleepData.inRange)}
@@ -693,7 +718,7 @@ function toastMilkLive(colors, night) {
   const cooldownColor = c.accent;
 
   return `<div class="toast-wrap">
-    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};--cooldown-color:${cooldownColor}">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)}">
       <button class="toast-cancel" style="background:${btnBg};color:${btnC};padding-top:4px">↩</button>
       <div style="text-align:center;margin-bottom:6px">
         <div style="font-size:14px;font-weight:800;color:${textC}">🍼 Biberon</div>
@@ -708,7 +733,7 @@ function toastMilkLive(colors, night) {
         <div style="font-size:9px;color:${colors.textSec}">90 mL</div>
         <div style="font-size:9px;color:${colors.textSec}">300 mL</div>
       </div>
-      <div class="toast-cooldown"></div>
+      ${cooldownSVG(cooldownColor)}
     </div>
   </div>`;
 }
@@ -807,6 +832,154 @@ document.getElementById('toast-kpi-demo').innerHTML = `
     ${toastKpiPhoneWrap(dayC, false, 'Light — Import sieste', toastBatchSleep(dayC, false, null), milk, sleep)}
     ${toastKpiPhoneWrap(nightC, true, 'Dark — Import sieste', toastBatchSleep(nightC, true, null), milk, sleep)}
   </div>`;
+
+// ===================== RÉCAP AUJOURD'HUI — SECTIONS =====================
+
+function recapSection(colors) {
+  return `<div style="padding-top:8px;margin-top:6px">
+    <div style="font-size:9px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">Aujourd'hui</div>
+    ${recapRows(colors, RECAP_EVENTS)}
+  </div>`;
+}
+
+function recapEmpty(colors) {
+  return `<div style="padding-top:8px;margin-top:6px">
+    <div style="font-size:9px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Aujourd'hui</div>
+    <div style="text-align:center;padding:16px 0;font-size:11px;font-weight:600;color:${colors.textSec}">Les événements s'afficheront ici</div>
+  </div>`;
+}
+
+/* Toast d'édition — tap sur une ligne du récap */
+function toastEdit(colors, night, emoji, label, time, value, unit, sliderPct, cat) {
+  const c = colors[cat];
+  const bg = c.bg;
+  const border = c.accent;
+  const textC = colors.text;
+  const btnBg = alpha(c.accent, 0.15);
+  const btnC = c.icon;
+
+  const isTimePrecise = /^\d/.test(time);
+  const timeRow = isTimePrecise
+    ? `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">-1</button>
+        <div style="font-size:16px;font-weight:800;color:${textC};min-width:54px;text-align:center">${time}</div>
+        <button class="toast-time-btn" style="background:${btnBg};color:${btnC}">+1</button>
+      </div>`
+    : `<div style="display:flex;justify-content:center;gap:6px;margin-bottom:14px">
+        ${['Matin','Midi','Après-midi'].map(m => `<button class="toast-moment-btn" style="background:${m===time ? c.inRange : btnBg};color:${m===time ? '#fff' : btnC};${m===time ? 'box-shadow:0 2px 6px '+alpha(c.inRange,0.3) : ''}">${m}</button>`).join('')}
+      </div>`;
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)}">
+      <button class="toast-cancel" style="background:${btnBg};color:${btnC}">✕</button>
+      <div style="text-align:center;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:800;color:${textC}">${emoji} ${label}</div>
+      </div>
+      ${timeRow}
+      ${rangeSlider(colors, cat, value, sliderPct)}
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:18px">
+        <button class="toast-action-btn" style="background:${btnBg};color:${btnC}">Supprimer</button>
+        <button class="toast-action-btn" style="background:${c.inRange};color:#fff;box-shadow:0 2px 6px ${alpha(c.inRange,0.3)}">Enregistrer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Toast undo — apparaît après suppression d'un événement du récap */
+function toastUndo(colors, night, cat) {
+  const c = colors[cat];
+  const bg = c.bg;
+  const border = c.accent;
+  const textC = colors.textSec;
+  const btnBg = alpha(c.accent, 0.15);
+  const btnC = c.icon;
+  const cooldownColor = c.accent;
+
+  return `<div class="toast-wrap">
+    <div class="toast" style="background:${bg};border:1.5px solid ${alpha(border,0.3)};box-shadow:0 -4px 20px ${alpha(border,0.15)};padding:12px 14px 12px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:14px;font-weight:800;color:${colors.text}">🗑️ Supprimé</div>
+        <button class="toast-action-btn" style="background:${btnBg};color:${btnC}">Annuler</button>
+      </div>
+      ${cooldownSVG(cooldownColor, 2)}
+    </div>
+  </div>`;
+}
+
+function recapPhoneWrap(colors, night, label, content) {
+  const bg = night ? bgNight : bgDay;
+  const shadow = night ? '0 8px 34px rgba(0,0,0,0.5)' : '0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)';
+  const notch = night ? '0.35' : '0.08';
+  return `<div class="phone-col">
+    <div class="phone-label">${label}</div>
+    <div class="phone-frame" style="background:${bg};box-shadow:${shadow}">
+      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${notch});z-index:10"></div>
+      ${headerHtml(colors)}
+      ${kpiCards(colors, night)}
+      ${content}
+    </div>
+  </div>`;
+}
+
+document.getElementById('recap-demo').innerHTML = `
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:0 0 8px">Liste — Journée remplie</h3>
+  <div class="phones-row">
+    ${recapPhoneWrap(dayC, false, 'Light — Récap', recapSection(dayC)+'</div>')}
+    ${recapPhoneWrap(nightC, true, 'Dark — Récap', recapSection(nightC)+'</div>')}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">État vide</h3>
+  <div class="phones-row">
+    ${recapPhoneWrap(dayC, false, 'Light — Vide', recapEmpty(dayC)+'</div>')}
+    ${recapPhoneWrap(nightC, true, 'Dark — Vide', recapEmpty(nightC)+'</div>')}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Toast édition — Biberon (heure précise)</h3>
+  <div class="phones-row">
+    ${recapPhoneWrap(dayC, false, 'Light — Édition biberon', recapSection(dayC)+'</div>' + toastEdit(dayC, false, '🍼', 'Biberon', '12h15', '150 mL', 'mL', 50, 'milk'))}
+    ${recapPhoneWrap(nightC, true, 'Dark — Édition biberon', recapSection(nightC)+'</div>' + toastEdit(nightC, true, '🍼', 'Biberon', '12h15', '150 mL', 'mL', 50, 'milk'))}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Toast édition — Import crèche (moment)</h3>
+  <div class="phones-row">
+    ${recapPhoneWrap(dayC, false, 'Light — Édition import', recapSection(dayC)+'</div>' + toastEdit(dayC, false, '🍼', 'Biberon', 'Matin', '180 mL', 'mL', 60, 'milk'))}
+    ${recapPhoneWrap(nightC, true, 'Dark — Édition import', recapSection(nightC)+'</div>' + toastEdit(nightC, true, '😴', 'Sieste', 'Matin', '1h00', 'min', 55, 'sleep'))}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Toast undo — Après suppression</h3>
+  <div class="phones-row">
+    ${recapPhoneWrap(dayC, false, 'Light — Undo biberon', recapSection(dayC)+'</div>' + toastUndo(dayC, false, 'milk'))}
+    ${recapPhoneWrap(nightC, true, 'Dark — Undo sieste', recapSection(nightC)+'</div>' + toastUndo(nightC, true, 'sleep'))}
+  </div>`;
+
+/* Post-rendu : construit un path rect-arrondi partant du milieu du bord top,
+   calcule le périmètre et injecte stroke-dasharray + couleur + durée. */
+document.querySelectorAll('.toast-cooldown').forEach(svg => {
+  const p = svg.querySelector('path');
+  const toast = svg.closest('.toast');
+  const w = toast.offsetWidth + 2;   // +2 pour inset:-1px
+  const h = toast.offsetHeight + 2;
+  const s = 1.25;                    // demi stroke-width (centrage du trait)
+  const r = 18;
+  // rect arrondi, départ = milieu bord top, sens horaire
+  const mx = w / 2;
+  const d = [
+    `M ${mx} ${s}`,                          // milieu bord top
+    `H ${w - s - r}`,                        // → droite
+    `A ${r} ${r} 0 0 1 ${w - s} ${s + r}`,   // coin top-right
+    `V ${h - s - r}`,                        // ↓ droite
+    `A ${r} ${r} 0 0 1 ${w - s - r} ${h - s}`, // coin bottom-right
+    `H ${s + r}`,                            // ← bas
+    `A ${r} ${r} 0 0 1 ${s} ${h - s - r}`,   // coin bottom-left
+    `V ${s + r}`,                            // ↑ gauche
+    `A ${r} ${r} 0 0 1 ${s + r} ${s}`,       // coin top-left
+    `H ${mx}`,                               // → retour milieu top
+  ].join(' ');
+  const perim = 2 * (w + h - 4 * s) - 8 * r + 2 * Math.PI * r;
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  p.setAttribute('d', d);
+  p.style.stroke = svg.dataset.cooldownColor;
+  p.style.strokeDasharray = perim;
+  p.style.setProperty('--perim', perim);
+  p.style.animationDuration = svg.dataset.cooldownDuration + 's';
+});
 </script>
 </body>
 </html>

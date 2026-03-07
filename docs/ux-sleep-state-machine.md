@@ -62,6 +62,7 @@ Le tap sur la hero card déclenche une **confirm card** (toast) proposant l'acti
 - **↩** : annulation (retour à l'état précédent)
 - **Alt** : bouton secondaire proposant l'action alternative (si applicable)
 - **Expiration** : à la fin du cooldown (5s), l'action **primary affichée** est automatiquement confirmée — pas de tap requis
+- **Tap hors toast** : équivaut à l'expiration — valide l'action primary et ferme le toast
 
 ### Time picker (tap sur l'heure)
 
