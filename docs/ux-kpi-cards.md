@@ -26,7 +26,7 @@ Deux cartes KPI sous la hero card : **Lait** 🍼 et **Sommeil** 😴. Chacune a
 - Moyenne glissante des **3 derniers jours**, contextualisée au **moment de la journée** (= **bar-avg**).
 - Le marqueur progresse au fil de la journée : "en moyenne à cette heure-là, la quantité/durée était de X".
 - Se met à jour en continu (pas besoin d'être à la seconde, mais pas besoin de refresh manuel).
-- **⚠️ Attention dev** : le lissage de la moyenne horaire doit gérer les événements sans heure précise ("ce matin", "après-midi"). L'algo de lissage est à concevoir côté implémentation — l'attendu UX est une progression fluide et cohérente au fil de la journée.
+- **⚠️ Attention dev** : le lissage de la moyenne horaire doit gérer les événements sans heure précise ("ce matin", "après-midi"). Fallback recommandé : répartition linéaire sur le créneau concerné (ex. "matin" = réparti uniformément entre 8h–12h, "après-midi" = 13h–17h). L'attendu UX est une progression fluide et cohérente au fil de la journée.
 
 ## Checkmark ✓
 
@@ -80,7 +80,7 @@ Deux cartes KPI sous la hero card : **Lait** 🍼 et **Sommeil** 😴. Chacune a
 - **Slider horizontal** par pas de 10 mL, valeur affichée **au-dessus** du thumb (le doigt ne cache pas la valeur).
 - Range du slider : bornes calculées selon le **poids** du bébé.
 - Tap sur l'heure → time picker (composant partagé avec la hero card).
-- **Cooldown 5s** → auto-confirm.
+- **Cooldown 5s** → auto-confirm. Si le parent ne modifie rien, la valeur par défaut (moyenne des 10 derniers biberons) est confirmée automatiquement.
 - **Bouton ↩** (annuler) : annule l'action en cours, le biberon n'est pas enregistré.
 - Pas de bouton alt.
 - *🎬 Animation potentielle : confirmation biberon*
@@ -102,6 +102,34 @@ Le CTA `+` ouvre un mode de saisie multiple pour importer les données communiqu
 - Pas de compteur — le parent verra les événements ajoutés dans la liste "Aujourd'hui".
 - Chaque domaine reste cloisonné : le + de la carte lait ne saisit que du lait, idem pour le sommeil.
 - *🎬 Animation potentielle : feedback d'ajout dans la liste "Aujourd'hui"*
+- **Persistance** : les données sont persistées localement avant sync. En cas de perte réseau ou crash, aucune saisie confirmée (via "Suivant" ou "Terminer") n'est perdue.
+
+## Fenêtre de données — diagramme cycle
+
+```
+Cycle normal (coucher → coucher) :
+  19h30 (night)  ─────────────────────────────  19h45 (night)
+  └── veille ──┘   données du "cycle" actuel    └── reset ──┘
+
+Fallback (pas de coucher enregistré → minuit) :
+  00h00 (minuit)  ─────────────────────────────  19h45 (night)
+  └── début ──┘    données du "cycle" actuel     └── reset ──┘
+```
+
+## Notes d'implémentation
+
+### Service CycleWindow
+
+Centraliser la logique de fenêtre temporelle dans un service dédié pour éviter que chaque composant réinvente le calcul. API minimale :
+- `currentCycleStart` : timestamp du début du cycle (dernier coucher, ou minuit en fallback)
+- `eventsInCycle()` : événements lait/sommeil dans la fenêtre courante
+- `rollingAverage(days, contextHour)` : moyenne glissante N jours, contextualisée à l'heure
+- Reset automatique au passage en état `night`
+
+### Points UX à valider en conditions réelles
+
+- **Icône import (CTA `+`)** : vérifier que les parents comprennent l'icône sans label. Si le taux de découverte est faible → ajouter un micro-label "Import" sous l'icône.
+- **Slider label sur petit écran** : la valeur affichée au-dessus du thumb pourrait être tronquée si le thumb est en haut de la zone toast. Tester sur les plus petits écrans cibles.
 
 ## Points UI restants
 
