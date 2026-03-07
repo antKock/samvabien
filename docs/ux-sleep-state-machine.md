@@ -39,6 +39,10 @@ Le tap sur la hero card déclenche une **confirm card** (toast) proposant l'acti
 | 5h–8h | `night` / `night-sleep` | ☀️ Réveil matin | 🫣 Réveil nocturne |
 | après 8h | `night` / `night-sleep` | ☀️ Réveil matin | *(pas d'alt)* |
 
+### Équivalence `night` / `night-sleep`
+
+`night-sleep` (rendormi après réveil nocturne) suit **exactement les mêmes transitions** que `night`. Les tableaux ci-dessus s'appliquent aux deux états.
+
 ### Transitions sans ambiguïté (pas d'alt)
 
 | État actuel | Action | Condition |
@@ -57,6 +61,7 @@ Le tap sur la hero card déclenche une **confirm card** (toast) proposant l'acti
 - **±1 min** : ajustement de l'heure (tap sur l'heure = édition précise)
 - **↩** : annulation (retour à l'état précédent)
 - **Alt** : bouton secondaire proposant l'action alternative (si applicable)
+- **Expiration** : à la fin du cooldown (5s), l'action **primary affichée** est automatiquement confirmée — pas de tap requis
 
 ### Time picker (tap sur l'heure)
 
@@ -72,6 +77,14 @@ Le tap sur la hero card déclenche une **confirm card** (toast) proposant l'acti
 3. L'utilisateur peut **re-alterner** autant de fois qu'il veut
 4. À expiration du cooldown → l'action **primary affichée** est confirmée
 
+## Bootstrap & persistance
+
+- **État initial** : `awake` — au premier lancement, le bébé est considéré éveillé
+- **Persistance** : l'état courant et l'heure de début sont sauvegardés localement. À la réouverture, l'app restaure l'état et recalcule la durée écoulée (ex. "Dort depuis 2h14")
+- **Pas de transitions automatiques** : l'app ne change jamais d'état toute seule — seul le parent déclenche les transitions via le tap sur la hero card
+
 ## Seuils horaires
 
 Les seuils (6h, 17h, 5h, 8h, etc.) sont des valeurs par défaut raisonnables. Ils pourront être affinés avec l'usage réel, mais **pas de config utilisateur** — l'app doit être simple.
+
+**Convention de bornes** : les plages sont **[début, fin[** (borne gauche inclusive, droite exclusive). Exemples : 6h–17h = de 6h00 à 16h59 ; 17h–23h = de 17h00 à 22h59.
