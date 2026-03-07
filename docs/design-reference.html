@@ -1092,7 +1092,7 @@ function renderProfilePage(colors, night) {
     ${deviceRow(colors, 'iPad du salon', '5 mars', night)}
 
     <div style="padding:18px 0 8px;text-align:center">
-      <button style="font-size:11px;font-weight:700;color:#c05050;background:${night ? 'rgba(200,80,80,0.12)' : 'rgba(200,80,80,0.06)'};border:1.5px solid rgba(200,80,80,0.2);border-radius:12px;padding:10px 0;width:100%;cursor:pointer;font-family:inherit">Quitter le foyer</button>
+      <button style="font-size:11px;font-weight:700;color:#c05050;background:${night ? 'rgba(200,80,80,0.12)' : 'rgba(200,80,80,0.06)'};border:1.5px solid rgba(200,80,80,0.2);border-radius:12px;padding:10px 0;width:100%;cursor:pointer;font-family:inherit">Quitter le profil</button>
     </div>
   </div>`;
 }
@@ -1105,22 +1105,48 @@ document.getElementById('profil-page-demo').innerHTML = `
 
 // ===================== ONBOARDING — LANDING + FORMULAIRE =====================
 
+/* --- Illustration landing : Visage bébé + couette + feuilles --- */
+function landingIllustration(colors) {
+  const skin = colors.milk.bg;
+  const cheek = alpha(colors.milk.accent, 0.35);
+  const blanket = alpha(colors.sleep.accent, 0.2);
+  const leaf1 = colors.sleep.accent;
+  const leaf2 = colors.sleep.icon;
+  return `<div style="width:110px;height:110px;position:relative;margin:0 auto 16px">
+    <!-- Couette -->
+    <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:96px;height:50px;background:${blanket};border-radius:48px 48px 22px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.06)"></div>
+    <!-- Tête -->
+    <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);width:64px;height:64px;background:${skin};border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,0.08)">
+      <div style="position:absolute;top:27px;left:16px;width:7px;height:3px;border-bottom:2px solid ${alpha(colors.text,0.4)};border-radius:0 0 50% 50%"></div>
+      <div style="position:absolute;top:27px;right:16px;width:7px;height:3px;border-bottom:2px solid ${alpha(colors.text,0.4)};border-radius:0 0 50% 50%"></div>
+      <div style="position:absolute;top:36px;left:50%;transform:translateX(-50%);width:9px;height:4px;border-bottom:2px solid ${alpha(colors.text,0.3)};border-radius:0 0 50% 50%"></div>
+      <div style="position:absolute;top:31px;left:7px;width:11px;height:6px;background:${cheek};border-radius:50%"></div>
+      <div style="position:absolute;top:31px;right:7px;width:11px;height:6px;background:${cheek};border-radius:50%"></div>
+      <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:14px;height:10px;background:${alpha(colors.text,0.12)};border-radius:50% 50% 0 0"></div>
+    </div>
+    <!-- Feuilles -->
+    <div style="position:absolute;top:-4px;right:-2px;width:28px;height:40px;background:${leaf1};border-radius:50% 0 50% 50%;transform:rotate(-25deg);opacity:0.5"></div>
+    <div style="position:absolute;top:-8px;right:22px;width:22px;height:32px;background:${leaf2};border-radius:0 50% 50% 50%;transform:rotate(15deg);opacity:0.35"></div>
+    <!-- Étoile -->
+    <div style="position:absolute;bottom:8px;left:4px;font-size:9px;opacity:0.25;color:${colors.milk.accent}">✦</div>
+  </div>`;
+}
+
 function renderLanding(colors, night) {
   const accentColor = colors.sleep.accent;
   const secBg = alpha(accentColor, 0.1);
   const secBorder = alpha(accentColor, 0.2);
 
   return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
-  <div class="phone-inner" style="display:flex;flex-direction:column;justify-content:center;min-height:460px">
-    <div style="text-align:center;margin-bottom:32px">
-      <div style="font-size:22px;font-weight:800;color:${colors.text}">samvabien</div>
-      <div style="font-size:10px;font-weight:600;color:${colors.textSec};margin-top:4px">Suivi bébé simple et serein</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;padding:0 8px">
-      <button style="font-size:13px;font-weight:800;color:white;background:${accentColor};border:none;border-radius:14px;padding:14px 0;width:100%;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px ${alpha(accentColor,0.25)}">Créer un profil</button>
-      <button style="font-size:13px;font-weight:700;color:${accentColor};background:${secBg};border:1.5px solid ${secBorder};border-radius:14px;padding:13px 0;width:100%;cursor:pointer;font-family:inherit">Rejoindre un foyer</button>
-      <button style="font-size:13px;font-weight:700;color:${colors.textSec};background:none;border:1.5px solid ${alpha(colors.textSec,0.15)};border-radius:14px;padding:13px 0;width:100%;cursor:pointer;font-family:inherit">Essayer la démo</button>
-    </div>
+  <div class="phone-inner" style="text-align:center;padding-top:90px">
+    ${landingIllustration(colors)}
+    <div style="font-size:32px;font-weight:800;color:${colors.sleep.icon};letter-spacing:-0.5px">pousse</div>
+    <div style="font-size:10px;font-weight:600;color:${colors.textSec};margin-top:4px">Suivi bébé simple et serein</div>
+  </div>
+  <div style="position:absolute;bottom:20px;left:13px;right:13px;display:flex;flex-direction:column;gap:10px">
+    <button style="font-size:13px;font-weight:800;color:white;background:${accentColor};border:none;border-radius:14px;padding:14px 0;width:100%;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px ${alpha(accentColor,0.25)}">Essayer la démo</button>
+    <button style="font-size:13px;font-weight:700;color:${accentColor};background:${secBg};border:1.5px solid ${secBorder};border-radius:14px;padding:13px 0;width:100%;cursor:pointer;font-family:inherit">Créer un profil</button>
+    <button style="font-size:13px;font-weight:700;color:${colors.textSec};background:none;border:none;border-radius:14px;padding:13px 0;width:100%;cursor:pointer;font-family:inherit">Rejoindre un foyer</button>
   </div>`;
 }
 
@@ -1206,47 +1232,13 @@ document.getElementById('onboarding-demo').innerHTML = `
   </div>`;
 
 // ===================== DÉMO BAR =====================
+// Inspiré du DemoBanner d'atable : bandeau en haut, bg accent/10, border-bottom accent/30
 
-function renderDemoBar(colors, night) {
-  const accentColor = colors.sleep.accent;
-  const barBg = night ? 'rgba(200,80,80,0.08)' : 'rgba(200,80,80,0.04)';
-
-  return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
-  <div class="phone-inner">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 6px">
-      <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Vendredi 7 mars</div>
-      <button style="display:inline-flex;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:inherit;padding:2px 0">
-        <span style="font-size:10px;font-weight:600;color:${colors.textSec}">${BABY_NAME}</span>
-        ${settingsIcon(colors.textSec)}
-      </button>
-    </div>
-    ${kpiCards(colors, night)}
-    ${detailSection(colors)}
-
-    <div style="position:fixed;bottom:0;left:0;right:0;z-index:20">
-      <div style="background:${night ? 'rgba(40,42,30,0.92)' : 'rgba(246,245,238,0.92)'};backdrop-filter:blur(8px);border-top:1px solid ${alpha(colors.textSec, 0.1)};padding:8px 12px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Mode démo</div>
-        <button style="font-size:10px;font-weight:700;color:${accentColor};background:${alpha(accentColor,0.1)};border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit">Créer un vrai profil</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-/* Démo bar utilise position:relative sur le phone-frame pour contenir le fixed */
-function demoPhoneWrap(colors, night, label, content) {
-  const bg = night ? bgNight : bgDay;
-  const shadow = night ? '0 8px 34px rgba(0,0,0,0.5)' : '0 4px 14px rgba(0,0,0,0.05), 0 14px 44px rgba(80,100,60,0.06)';
-  const notch = night ? '0.35' : '0.08';
-  return `<div class="phone-col">
-    <div class="phone-label">${label}</div>
-    <div class="phone-frame" style="background:${bg};box-shadow:${shadow};position:relative;overflow:hidden">
-      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:16px;background:rgba(0,0,0,${notch});z-index:10"></div>
-      ${content}
-      <div style="position:absolute;bottom:0;left:0;right:0;background:${night ? 'rgba(40,42,30,0.92)' : 'rgba(246,245,238,0.92)'};backdrop-filter:blur(8px);border-top:1px solid ${alpha(colors.textSec, 0.1)};padding:8px 12px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Mode démo</div>
-        <button style="font-size:10px;font-weight:700;color:${colors.sleep.accent};background:${alpha(colors.sleep.accent,0.1)};border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit">Créer un vrai profil</button>
-      </div>
-    </div>
+function demoBanner(colors) {
+  const accent = colors.sleep.accent;
+  return `<div style="display:flex;align-items:center;justify-content:space-between;gap:4px;background:${alpha(accent,0.10)};border-bottom:1.5px solid ${alpha(accent,0.30)};padding:6px 12px;margin:-14px -14px 10px -14px">
+    <div style="font-size:9px;font-weight:600;color:${accent}">Mode démo — données non conservées</div>
+    <button style="font-size:9px;font-weight:700;color:${accent};background:${alpha(accent,0.12)};border:1px solid ${alpha(accent,0.25)};cursor:pointer;font-family:inherit;padding:4px 10px;border-radius:6px;white-space:nowrap">Quitter</button>
   </div>`;
 }
 
@@ -1257,6 +1249,7 @@ function renderDemoContent(colors, night) {
 
   return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
   <div class="phone-inner">
+    ${demoBanner(colors)}
     <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 6px">
       <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Vendredi 7 mars</div>
       <button style="display:inline-flex;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:inherit;padding:2px 0">
@@ -1277,8 +1270,8 @@ function renderDemoContent(colors, night) {
 
 document.getElementById('demo-bar-demo').innerHTML = `
   <div class="phones-row">
-    ${demoPhoneWrap(dayC, false, 'Light — Démo', renderDemoContent(dayC, false))}
-    ${demoPhoneWrap(nightC, true, 'Dark — Démo', renderDemoContent(nightC, true))}
+    ${profilPhoneWrap(dayC, false, 'Light — Démo', renderDemoContent(dayC, false))}
+    ${profilPhoneWrap(nightC, true, 'Dark — Démo', renderDemoContent(nightC, true))}
   </div>`;
 
 /* Post-rendu : construit un path rect-arrondi partant du milieu du bord top,
