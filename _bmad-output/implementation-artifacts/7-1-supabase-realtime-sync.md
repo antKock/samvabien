@@ -1,6 +1,6 @@
 # Story 7.1: Supabase Realtime — sync inter-appareils
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -24,36 +24,36 @@ So that on partage les mêmes données sans se les envoyer.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Créer `src/hooks/useRealtimeSync.ts` (AC: #1, #6)
-  - [ ] Importer `supabase` depuis `@/lib/supabase/client`
-  - [ ] Paramètres : `profileId: string | null`, `isDemo: boolean`
-  - [ ] Guard : si `isDemo` ou `!profileId` → ne rien subscribe, retourner
-  - [ ] Subscribe au channel `household:{profileId}` via `supabase.channel(...)`
-  - [ ] Écouter les changements sur `pousse_events` filtrés par `profile_id=eq.{profileId}` — INSERT, UPDATE, DELETE
-  - [ ] Écouter les changements sur `pousse_profiles` filtré par `id=eq.{profileId}` — UPDATE uniquement
-  - [ ] Cleanup : `supabase.removeChannel(channel)` au démontage du composant
-- [ ] Task 2 — Ajouter des méthodes de mutation interne au `HouseholdContext` (AC: #2, #3, #4, #5)
-  - [ ] Ajouter `_ingestRealtimeEvent(type: 'INSERT' | 'UPDATE' | 'DELETE', payload: Record<string, unknown>)` — méthode interne
-  - [ ] INSERT : mapper snake_case → camelCase, ajouter l'event au state (éviter les doublons par id)
-  - [ ] UPDATE : mapper et mettre à jour l'event existant par id
-  - [ ] DELETE : retirer l'event par `old.id`
-  - [ ] Ajouter `_ingestRealtimeProfile(payload: Record<string, unknown>)` — mettre à jour le profile dans le state
-  - [ ] Mapper `sleep_state` → `sleepState`, `sleep_state_since` → `sleepStateSince`, `sleep_state_moment` → `sleepStateMoment`, `baby_name` → `babyName`, etc.
-- [ ] Task 3 — Brancher le hook dans `(app)/layout.tsx` (AC: #1)
-  - [ ] Appeler `useRealtimeSync(profile?.id ?? null, isDemo)` dans le composant AppLayout
-  - [ ] Passer les callbacks d'ingestion depuis le context
-- [ ] Task 4 — Gérer les doublons optimistic vs Realtime (AC: #2, #3)
-  - [ ] Quand un INSERT arrive par Realtime et que l'event a déjà le même `id` dans le state (suite à un optimistic update local) → ignorer l'INSERT
-  - [ ] Quand un INSERT arrive avec un id inconnu → l'ajouter (c'est un event de l'autre appareil)
-  - [ ] Quand un UPDATE arrive pour un event temp (`temp-*` id) → le remplacer par l'event serveur
-- [ ] Task 5 — Tests unitaires (AC: #1-#6)
-  - [ ] Test : useRealtimeSync subscribe au bon channel avec le profileId
-  - [ ] Test : useRealtimeSync ne subscribe pas en mode démo
-  - [ ] Test : INSERT broadcasté → event ajouté au state
-  - [ ] Test : UPDATE broadcasté → event mis à jour
-  - [ ] Test : DELETE broadcasté → event retiré
-  - [ ] Test : UPDATE profiles → sleepState mis à jour dans le context
-  - [ ] Test : doublon optimistic ignoré (même id)
+- [x] Task 1 — Créer `src/hooks/useRealtimeSync.ts` (AC: #1, #6)
+  - [x] Importer `supabase` depuis `@/lib/supabase/client`
+  - [x] Paramètres : `profileId: string | null`, `isDemo: boolean`
+  - [x] Guard : si `isDemo` ou `!profileId` → ne rien subscribe, retourner
+  - [x] Subscribe au channel `household:{profileId}` via `supabase.channel(...)`
+  - [x] Écouter les changements sur `pousse_events` filtrés par `profile_id=eq.{profileId}` — INSERT, UPDATE, DELETE
+  - [x] Écouter les changements sur `pousse_profiles` filtré par `id=eq.{profileId}` — UPDATE uniquement
+  - [x] Cleanup : `supabase.removeChannel(channel)` au démontage du composant
+- [x] Task 2 — Ajouter des méthodes de mutation interne au `HouseholdContext` (AC: #2, #3, #4, #5)
+  - [x] Ajouter `_ingestRealtimeEvent(type: 'INSERT' | 'UPDATE' | 'DELETE', payload: Record<string, unknown>)` — méthode interne
+  - [x] INSERT : mapper snake_case → camelCase, ajouter l'event au state (éviter les doublons par id)
+  - [x] UPDATE : mapper et mettre à jour l'event existant par id
+  - [x] DELETE : retirer l'event par `old.id`
+  - [x] Ajouter `_ingestRealtimeProfile(payload: Record<string, unknown>)` — mettre à jour le profile dans le state
+  - [x] Mapper `sleep_state` → `sleepState`, `sleep_state_since` → `sleepStateSince`, `sleep_state_moment` → `sleepStateMoment`, `baby_name` → `babyName`, etc.
+- [x] Task 3 — Brancher le hook dans `(app)/layout.tsx` (AC: #1)
+  - [x] Appeler `useRealtimeSync(profile?.id ?? null, isDemo)` dans le composant AppLayout
+  - [x] Passer les callbacks d'ingestion depuis le context
+- [x] Task 4 — Gérer les doublons optimistic vs Realtime (AC: #2, #3)
+  - [x] Quand un INSERT arrive par Realtime et que l'event a déjà le même `id` dans le state (suite à un optimistic update local) → ignorer l'INSERT
+  - [x] Quand un INSERT arrive avec un id inconnu → l'ajouter (c'est un event de l'autre appareil)
+  - [x] Quand un UPDATE arrive pour un event temp (`temp-*` id) → le remplacer par l'event serveur
+- [x] Task 5 — Tests unitaires (AC: #1-#6)
+  - [x] Test : useRealtimeSync subscribe au bon channel avec le profileId
+  - [x] Test : useRealtimeSync ne subscribe pas en mode démo
+  - [x] Test : INSERT broadcasté → event ajouté au state
+  - [x] Test : UPDATE broadcasté → event mis à jour
+  - [x] Test : DELETE broadcasté → event retiré
+  - [x] Test : UPDATE profiles → sleepState mis à jour dans le context
+  - [x] Test : doublon optimistic ignoré (même id)
 
 ## Dev Notes
 
@@ -182,6 +182,28 @@ Claude Opus 4.6
 
 ### Debug Log References
 
+- Lint error on `callbacksRef.current = callbacks` outside useEffect (react-hooks/refs rule). Fixed by wrapping in a dedicated useEffect.
+
 ### Completion Notes List
 
+- Created shared mappers (`mapEventFromDb`, `mapProfileFromDb`) in `src/lib/supabase/mappers.ts` to avoid duplication with API routes
+- Hook `useRealtimeSync` subscribes to channel `household:{profileId}` with separate listeners for INSERT/UPDATE/DELETE on `pousse_events` and UPDATE on `pousse_profiles`
+- Uses `useRef` pattern for stable callbacks to avoid resubscribing on every render
+- Ingestion methods `_ingestRealtimeEvent` and `_ingestRealtimeProfile` added to HouseholdContext
+- Duplicate detection: INSERT ignores events with existing id (optimistic conflict); UPDATE replaces temp-* events
+- `RealtimeSyncBridge` component created inside layout to bridge context and hook
+- 14 new tests covering all acceptance criteria (8 hook tests + 6 context ingestion tests)
+- All 139 tests pass (no regressions), lint clean
+
+### Change Log
+
+- 2026-03-08: Implemented Supabase Realtime sync (Story 7.1) — hook, context ingestion methods, layout integration, duplicate handling, 14 unit tests
+
 ### File List
+
+- `src/hooks/useRealtimeSync.ts` (new) — Realtime subscription hook
+- `src/lib/supabase/mappers.ts` (new) — shared snake_case → camelCase mappers
+- `src/contexts/HouseholdContext.tsx` (modified) — added `_ingestRealtimeEvent`, `_ingestRealtimeProfile`
+- `src/app/(app)/layout.tsx` (modified) — added `RealtimeSyncBridge` component
+- `src/hooks/__tests__/useRealtimeSync.test.ts` (new) — 8 tests for hook
+- `src/contexts/__tests__/HouseholdContext.realtime.test.tsx` (new) — 6 tests for ingestion

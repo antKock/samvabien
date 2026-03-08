@@ -40,7 +40,7 @@ function buildDateColumns(currentDob: string) {
 
 export default function ProfileScreen() {
   const router = useRouter()
-  const { profile, devices, updateProfile, error, clearError } = useHousehold()
+  const { profile, devices, isDemo, updateProfile, error, clearError } = useHousehold()
 
   // Auto-dismiss error after 4 seconds
   useEffect(() => {
@@ -158,7 +158,7 @@ export default function ProfileScreen() {
         {/* Header with back button */}
         <div className="mb-6 flex items-center gap-3">
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(isDemo ? '/dashboard?demo=true' : '/dashboard')}
             className="text-text-sec"
             style={{ fontSize: '20px' }}
             aria-label="Retour"
@@ -309,72 +309,76 @@ export default function ProfileScreen() {
             </div>
           </section>
 
-          {/* Section: Foyer */}
-          <section className="rounded-[20px] bg-surface p-5">
-            <h2
-              className="mb-4 text-text"
-              style={{ fontSize: '14px', fontWeight: 800 }}
-            >
-              Foyer
-            </h2>
+          {/* Section: Foyer — hidden in demo mode */}
+          {!isDemo && (
+            <section className="rounded-[20px] bg-surface p-5">
+              <h2
+                className="mb-4 text-text"
+                style={{ fontSize: '14px', fontWeight: 800 }}
+              >
+                Foyer
+              </h2>
 
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-text" style={{ fontSize: '16px', fontWeight: 700 }}>
-                {profile.joinCode}
-              </span>
-              <button
-                onClick={handleCopyLink}
-                className="rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-accent"
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-text" style={{ fontSize: '16px', fontWeight: 700 }}>
+                  {profile.joinCode}
+                </span>
+                <button
+                  onClick={handleCopyLink}
+                  className="rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-accent"
+                  style={{ fontSize: '12px', fontWeight: 700 }}
+                >
+                  {copiedLink ? '✓ Copié !' : 'Copier le lien'}
+                </button>
+              </div>
+
+              <h3
+                className="mb-3 text-text-sec"
                 style={{ fontSize: '12px', fontWeight: 700 }}
               >
-                {copiedLink ? '✓ Copié !' : 'Copier le lien'}
-              </button>
-            </div>
+                Appareils connectés
+              </h3>
 
-            <h3
-              className="mb-3 text-text-sec"
-              style={{ fontSize: '12px', fontWeight: 700 }}
-            >
-              Appareils connectés
-            </h3>
-
-            <div className="flex flex-col gap-2">
-              {devices.map((device) => (
-                <div
-                  key={device.id}
-                  className="flex items-center justify-between rounded-[14px] bg-bg p-3"
-                >
-                  <div>
-                    <p className="text-text" style={{ fontSize: '13px', fontWeight: 700 }}>
-                      {device.deviceName ?? 'Appareil inconnu'}
-                    </p>
-                    <p className="text-text-sec" style={{ fontSize: '11px', fontWeight: 600 }}>
-                      Dernière connexion : {formatDate(device.lastSeen)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleRevokeDevice(device.id)}
-                    className="text-milk-accent"
-                    style={{ fontSize: '12px', fontWeight: 700 }}
+              <div className="flex flex-col gap-2">
+                {devices.map((device) => (
+                  <div
+                    key={device.id}
+                    className="flex items-center justify-between rounded-[14px] bg-bg p-3"
                   >
-                    Déconnecter
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
+                    <div>
+                      <p className="text-text" style={{ fontSize: '13px', fontWeight: 700 }}>
+                        {device.deviceName ?? 'Appareil inconnu'}
+                      </p>
+                      <p className="text-text-sec" style={{ fontSize: '11px', fontWeight: 600 }}>
+                        Dernière connexion : {formatDate(device.lastSeen)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleRevokeDevice(device.id)}
+                      className="text-milk-accent"
+                      style={{ fontSize: '12px', fontWeight: 700 }}
+                    >
+                      Déconnecter
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-          {/* Section: Actions */}
-          <section>
-            <button
-              onClick={handleLeave}
-              disabled={isLeaving}
-              className="h-12 w-full rounded-full bg-red-600 text-white disabled:opacity-50"
-              style={{ fontSize: '14px', fontWeight: 700 }}
-            >
-              {isLeaving ? '...' : 'Quitter le profil'}
-            </button>
-          </section>
+          {/* Section: Actions — hidden in demo mode */}
+          {!isDemo && (
+            <section>
+              <button
+                onClick={handleLeave}
+                disabled={isLeaving}
+                className="h-12 w-full rounded-full bg-red-600 text-white disabled:opacity-50"
+                style={{ fontSize: '14px', fontWeight: 700 }}
+              >
+                {isLeaving ? '...' : 'Quitter le profil'}
+              </button>
+            </section>
+          )}
         </div>
       </div>
 

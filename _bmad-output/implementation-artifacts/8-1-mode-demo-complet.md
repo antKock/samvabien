@@ -1,6 +1,6 @@
 # Story 8.1: Mode démo complet
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -28,9 +28,9 @@ So that je peux voir comment elle fonctionne avant de créer mon propre profil.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Créer `src/lib/demo-data.ts` (AC: #2)
-  - [ ] Exporter `DEMO_PROFILE: Profile` — bébé "Léo", né il y a ~4 mois (calculer dynamiquement depuis la date courante), poids 62 hg (6,2 kg), `sleepState: 'awake'`, `sleepStateSince: null`, `sleepStateMoment: null`, `weightReminder: true`, `joinCode: 'DEMO-0000'`
-  - [ ] Exporter `DEMO_EVENTS: BabyEvent[]` — snapshot figé à 17h30 d'une journée réaliste :
+- [x] Task 1 — Créer `src/lib/demo-data.ts` (AC: #2)
+  - [x] Exporter `DEMO_PROFILE: Profile` — bébé "Léo", né il y a ~4 mois (calculer dynamiquement depuis la date courante), poids 62 hg (6,2 kg), `sleepState: 'awake'`, `sleepStateSince: null`, `sleepStateMoment: null`, `weightReminder: true`, `joinCode: 'DEMO-0000'`
+  - [x] Exporter `DEMO_EVENTS: BabyEvent[]` — snapshot figé à 17h30 d'une journée réaliste :
     - Nuit de la veille : type `'night'`, value 600 (10h), startedAt ~21h00 veille
     - Biberon matin 7h30 : type `'bottle'`, value 180
     - Sieste matin 9h30–10h45 : type `'nap'`, value 75, startedAt ~9h30
@@ -38,46 +38,46 @@ So that je peux voir comment elle fonctionne avant de créer mon propre profil.
     - Sieste après-midi 13h30–15h00 : type `'nap'`, value 90, startedAt ~13h30
     - Biberon 15h30 : type `'bottle'`, value 150
     - Événement crèche (sans heure) : type `'bottle'`, value 120, moment `'afternoon'`
-  - [ ] Tous les events ont des `id` stables (ex. `'demo-1'`, `'demo-2'`, etc.)
-  - [ ] Toutes les dates sont calculées dynamiquement par rapport à la date courante pour que le snapshot soit toujours "aujourd'hui"
-- [ ] Task 2 — Créer `src/hooks/useDemo.ts` (AC: #4, #5, #6)
-  - [ ] Exporter un hook qui retourne l'interface `HouseholdState` + les actions
-  - [ ] State initialisé à partir de `DEMO_PROFILE` et `DEMO_EVENTS`
-  - [ ] `addEvent()` : créer un event avec id `demo-new-{timestamp}`, l'ajouter au state local — AUCUN fetch
-  - [ ] `updateEvent()` : modifier l'event dans le state local — AUCUN fetch
-  - [ ] `deleteEvent()` / `removeEventLocally()` : retirer du state local — AUCUN fetch
-  - [ ] `transitionSleepState()` : mettre à jour le profile local + créer l'event de transition — AUCUN fetch
-  - [ ] `updateProfile()` : mettre à jour le profile dans le state local — AUCUN fetch
-  - [ ] Refresh de la page → le hook se ré-initialise avec les données de base (React state = éphémère)
-- [ ] Task 3 — Brancher le mode démo dans `HouseholdContext` (AC: #4, #5)
-  - [ ] Ajouter un state `isDemo: boolean` dans le provider
-  - [ ] Mécanisme d'activation : quand `isDemo` est true, toutes les actions (addEvent, transitionSleepState, etc.) opèrent en mémoire au lieu d'appeler les API
-  - [ ] Option 1 (recommandée) : `HouseholdProvider` accepte une prop `demo?: boolean`. Si `demo`, initialiser le state avec `DEMO_PROFILE` + `DEMO_EVENTS` au lieu de fetcher `/api/household`
-  - [ ] Option 2 : créer un `DemoHouseholdProvider` séparé qui wraps les mêmes callbacks mais en mémoire
-  - [ ] Choisir l'option qui minimise la duplication de code — le context expose la même interface dans les deux modes
-- [ ] Task 4 — Bandeau démo (AC: #3, #7)
-  - [ ] Créer `src/components/ui/DemoBanner.tsx`
-  - [ ] Texte : "Mode démo — données non conservées" (12px, weight 600, couleur text-sec)
-  - [ ] CTA : bouton "Quitter" (style lien, même couleur)
-  - [ ] Style : sticky en haut, fond surface, border-bottom, z-index au-dessus du contenu
-  - [ ] Au tap "Quitter" → router.push('/') (retour landing)
-  - [ ] Affiché conditionnellement dans `(app)/layout.tsx` quand `isDemo === true`
-- [ ] Task 5 — Bouton "Essayer la démo" dans LandingScreen (AC: #1)
-  - [ ] Le composant `src/components/onboarding/LandingScreen.tsx` a déjà le bouton "Essayer la démo" (primary)
-  - [ ] Au tap → naviguer vers `/dashboard?demo=true` (ou une route dédiée)
-  - [ ] Le layout `(app)/layout.tsx` détecte le paramètre `demo` et active le mode démo dans le provider
-  - [ ] Pas de session serveur, pas de cookie JWT — tout est client-side
-- [ ] Task 6 — Masquer les features sans sens en démo (AC: #8)
-  - [ ] `ProfileScreen` : masquer la section "Foyer" (code invitation, copier lien, appareils) quand `isDemo`
-  - [ ] `ProfileScreen` : masquer le bouton "Quitter le profil" quand `isDemo` (le bouton du bandeau suffit)
-  - [ ] `ProfileHeaderButton` : toujours visible (le profil est consultable en démo)
-- [ ] Task 7 — Tests unitaires (AC: #1-#8)
-  - [ ] Test : DEMO_EVENTS contient un historique cohérent (nuit + biberons + siestes)
-  - [ ] Test : useDemo addEvent ajoute un event au state local sans fetch
-  - [ ] Test : useDemo transitionSleepState met à jour le profile local
-  - [ ] Test : DemoBanner s'affiche avec le bon texte et le bouton Quitter
-  - [ ] Test : ProfileScreen masque la section Foyer en mode démo
-  - [ ] Test : HouseholdContext en mode démo n'appelle aucune API
+  - [x] Tous les events ont des `id` stables (ex. `'demo-1'`, `'demo-2'`, etc.)
+  - [x] Toutes les dates sont calculées dynamiquement par rapport à la date courante pour que le snapshot soit toujours "aujourd'hui"
+- [x] Task 2 — Créer `src/hooks/useDemo.ts` (AC: #4, #5, #6)
+  - [x] Exporter un hook qui retourne l'interface `HouseholdState` + les actions
+  - [x] State initialisé à partir de `DEMO_PROFILE` et `DEMO_EVENTS`
+  - [x] `addEvent()` : créer un event avec id `demo-new-{timestamp}`, l'ajouter au state local — AUCUN fetch
+  - [x] `updateEvent()` : modifier l'event dans le state local — AUCUN fetch
+  - [x] `deleteEvent()` / `removeEventLocally()` : retirer du state local — AUCUN fetch
+  - [x] `transitionSleepState()` : mettre à jour le profile local + créer l'event de transition — AUCUN fetch
+  - [x] `updateProfile()` : mettre à jour le profile dans le state local — AUCUN fetch
+  - [x] Refresh de la page → le hook se ré-initialise avec les données de base (React state = éphémère)
+- [x] Task 3 — Brancher le mode démo dans `HouseholdContext` (AC: #4, #5)
+  - [x] Ajouter un state `isDemo: boolean` dans le provider
+  - [x] Mécanisme d'activation : quand `isDemo` est true, toutes les actions (addEvent, transitionSleepState, etc.) opèrent en mémoire au lieu d'appeler les API
+  - [x] Option 1 (recommandée) : `HouseholdProvider` accepte une prop `demo?: boolean`. Si `demo`, initialiser le state avec `DEMO_PROFILE` + `DEMO_EVENTS` au lieu de fetcher `/api/household`
+  - [x] Option 2 : créer un `DemoHouseholdProvider` séparé qui wraps les mêmes callbacks mais en mémoire
+  - [x] Choisir l'option qui minimise la duplication de code — le context expose la même interface dans les deux modes
+- [x] Task 4 — Bandeau démo (AC: #3, #7)
+  - [x] Créer `src/components/ui/DemoBanner.tsx`
+  - [x] Texte : "Mode démo — données non conservées" (12px, weight 600, couleur text-sec)
+  - [x] CTA : bouton "Quitter" (style lien, même couleur)
+  - [x] Style : sticky en haut, fond surface, border-bottom, z-index au-dessus du contenu
+  - [x] Au tap "Quitter" → router.push('/') (retour landing)
+  - [x] Affiché conditionnellement dans `(app)/layout.tsx` quand `isDemo === true`
+- [x] Task 5 — Bouton "Essayer la démo" dans LandingScreen (AC: #1)
+  - [x] Le composant `src/components/onboarding/LandingScreen.tsx` a déjà le bouton "Essayer la démo" (primary)
+  - [x] Au tap → naviguer vers `/dashboard?demo=true` (ou une route dédiée)
+  - [x] Le layout `(app)/layout.tsx` détecte le paramètre `demo` et active le mode démo dans le provider
+  - [x] Pas de session serveur, pas de cookie JWT — tout est client-side
+- [x] Task 6 — Masquer les features sans sens en démo (AC: #8)
+  - [x] `ProfileScreen` : masquer la section "Foyer" (code invitation, copier lien, appareils) quand `isDemo`
+  - [x] `ProfileScreen` : masquer le bouton "Quitter le profil" quand `isDemo` (le bouton du bandeau suffit)
+  - [x] `ProfileHeaderButton` : toujours visible (le profil est consultable en démo)
+- [x] Task 7 — Tests unitaires (AC: #1-#8)
+  - [x] Test : DEMO_EVENTS contient un historique cohérent (nuit + biberons + siestes)
+  - [x] Test : useDemo addEvent ajoute un event au state local sans fetch
+  - [x] Test : useDemo transitionSleepState met à jour le profile local
+  - [x] Test : DemoBanner s'affiche avec le bon texte et le bouton Quitter
+  - [x] Test : ProfileScreen masque la section Foyer en mode démo
+  - [x] Test : HouseholdContext en mode démo n'appelle aucune API
 
 ## Dev Notes
 
@@ -186,6 +186,37 @@ Claude Opus 4.6
 
 ### Debug Log References
 
+- Build initial échouait car `useSearchParams()` dans le layout n'était pas dans un Suspense boundary. Résolu en wrappant `AppLayoutInner` dans `<Suspense>`.
+
 ### Completion Notes List
 
+- Implémenté le mode démo complet avec données fictives (bébé Léo, ~4 mois, snapshot 17h30)
+- Architecture : `HouseholdProvider` accepte prop `demo` → rend `DemoHouseholdProvider` ou `ApiHouseholdProvider`
+- Hook `useDemo` gère tout le state en mémoire React (aucun fetch, aucune écriture Supabase)
+- Bandeau démo sticky avec texte et bouton Quitter
+- Middleware bypass pour `?demo=true` (pas de JWT requis)
+- Section Foyer et bouton "Quitter le profil" masqués en mode démo
+- 24 nouveaux tests ajoutés, 163 tests total passent, build Next.js OK
+
+### Change Log
+
+- 2026-03-08: Implémentation complète du mode démo (Story 8.1) — données fictives, mutations en mémoire, bandeau, middleware bypass, masquage des features multi-appareil, tests unitaires
+
 ### File List
+
+**Fichiers créés :**
+- src/lib/demo-data.ts
+- src/hooks/useDemo.ts
+- src/components/ui/DemoBanner.tsx
+- src/lib/__tests__/demo-data.test.ts
+- src/hooks/__tests__/useDemo.test.ts
+- src/components/ui/__tests__/DemoBanner.test.tsx
+- src/components/profile/__tests__/ProfileScreen.demo.test.tsx
+- src/contexts/__tests__/HouseholdContext.demo.test.tsx
+
+**Fichiers modifiés :**
+- src/contexts/HouseholdContext.tsx
+- src/app/(app)/layout.tsx
+- src/components/onboarding/LandingScreen.tsx
+- src/components/profile/ProfileScreen.tsx
+- src/middleware.ts

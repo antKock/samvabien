@@ -51,7 +51,7 @@ export default function LandingScreen() {
 
         <div className="flex w-full flex-col gap-3">
           <Link
-            href="#"
+            href="/dashboard?demo=true"
             className="flex h-12 items-center justify-center rounded-full bg-accent text-white"
             style={{ fontSize: '14px', fontWeight: 700 }}
           >

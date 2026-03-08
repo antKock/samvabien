@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from 'react'
 import type { Profile, BabyEvent, DeviceSession, SleepState, EventType, Moment } from '@/types'
+import { mapEventFromDb, mapProfileFromDb } from '@/lib/supabase/mappers'
+import { useDemo } from '@/hooks/useDemo'
 
 interface HouseholdState {
   profile: Profile | null
@@ -48,11 +50,30 @@ interface HouseholdContextValue extends HouseholdState {
   deleteEvent: (id: string) => Promise<void>
   updateProfile: (data: UpdateProfileParams) => Promise<void>
   clearError: () => void
+  _ingestRealtimeEvent: (type: 'INSERT' | 'UPDATE' | 'DELETE', payload: Record<string, unknown>) => void
+  _ingestRealtimeProfile: (payload: Record<string, unknown>) => void
 }
 
 const HouseholdContext = createContext<HouseholdContextValue | null>(null)
 
-export function HouseholdProvider({ children }: { children: ReactNode }) {
+export function HouseholdProvider({ children, demo = false }: { children: ReactNode; demo?: boolean }) {
+  if (demo) {
+    return <DemoHouseholdProvider>{children}</DemoHouseholdProvider>
+  }
+
+  return <ApiHouseholdProvider>{children}</ApiHouseholdProvider>
+}
+
+function DemoHouseholdProvider({ children }: { children: ReactNode }) {
+  const demoValue = useDemo()
+  return (
+    <HouseholdContext.Provider value={demoValue}>
+      {children}
+    </HouseholdContext.Provider>
+  )
+}
+
+function ApiHouseholdProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<HouseholdState>({
     profile: null,
     events: [],
@@ -77,7 +98,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
           error: null,
         })
       } catch {
-        setState((s) => ({ ...s, isLoading: false }))
+        setState((s) => ({ ...s, isLoading: false, error: 'Impossible de charger les données. Vérifiez votre connexion.' }))
       }
     }
     load()
@@ -292,8 +313,53 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, error: null }))
   }, [])
 
+  const _ingestRealtimeEvent = useCallback(
+    (type: 'INSERT' | 'UPDATE' | 'DELETE', payload: Record<string, unknown>) => {
+      if (type === 'INSERT') {
+        const event = mapEventFromDb(payload)
+        setState((s) => {
+          // Ignore if event already exists (optimistic duplicate)
+          if (s.events.some((e) => e.id === event.id)) return s
+          // Insert and maintain reverse-chronological order
+          const events = [...s.events, event].sort((a, b) => {
+            const aTime = a.startedAt ?? a.createdAt
+            const bTime = b.startedAt ?? b.createdAt
+            return new Date(bTime).getTime() - new Date(aTime).getTime()
+          })
+          return { ...s, events }
+        })
+      } else if (type === 'UPDATE') {
+        const event = mapEventFromDb(payload)
+        setState((s) => ({
+          ...s,
+          events: s.events.map((e) => {
+            return e.id === event.id ? event : e
+          }),
+        }))
+      } else if (type === 'DELETE') {
+        const oldId = payload.id as string
+        setState((s) => ({
+          ...s,
+          events: s.events.filter((e) => e.id !== oldId),
+        }))
+      }
+    },
+    [],
+  )
+
+  const _ingestRealtimeProfile = useCallback(
+    (payload: Record<string, unknown>) => {
+      const partial = mapProfileFromDb(payload)
+      setState((s) => {
+        if (!s.profile) return s
+        return { ...s, profile: { ...s.profile, ...partial } }
+      })
+    },
+    [],
+  )
+
   return (
-    <HouseholdContext.Provider value={{ ...state, transitionSleepState, addEvent, updateEvent, removeEventLocally, restoreEvent, deleteEvent, updateProfile, clearError }}>
+    <HouseholdContext.Provider value={{ ...state, transitionSleepState, addEvent, updateEvent, removeEventLocally, restoreEvent, deleteEvent, updateProfile, clearError, _ingestRealtimeEvent, _ingestRealtimeProfile }}>
       {children}
     </HouseholdContext.Provider>
   )

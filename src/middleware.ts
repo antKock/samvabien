@@ -19,6 +19,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Demo mode bypass — no auth required (pages only, never API routes)
+  if (!pathname.startsWith('/api/') && request.nextUrl.searchParams.get('demo') === 'true') {
+    return NextResponse.next()
+  }
+
   const token = request.cookies.get('pousse_session')?.value
   if (!token) {
     return NextResponse.redirect(new URL('/', request.url))
