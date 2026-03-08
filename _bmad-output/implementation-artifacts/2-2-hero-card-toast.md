@@ -1,6 +1,6 @@
 # Story 2.2: Hero card & toast de transition
 
-Status: review
+Status: done
 
 ## Story
 

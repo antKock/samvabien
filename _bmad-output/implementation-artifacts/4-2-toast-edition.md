@@ -1,6 +1,6 @@
 # Story 4.2: Toast d'édition d'un événement
 
-Status: review
+Status: done
 
 ## Story
 

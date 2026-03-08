@@ -4,12 +4,13 @@ import Link from 'next/link'
 
 interface ProfileHeaderButtonProps {
   babyName: string
+  isDemo?: boolean
 }
 
-export default function ProfileHeaderButton({ babyName }: ProfileHeaderButtonProps) {
+export default function ProfileHeaderButton({ babyName, isDemo }: ProfileHeaderButtonProps) {
   return (
     <Link
-      href="/profile"
+      href={isDemo ? '/profile?demo=true' : '/profile'}
       className="flex items-center gap-[3px] text-text-sec"
       style={{ fontSize: '10px', fontWeight: 600 }}
     >

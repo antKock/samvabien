@@ -15,7 +15,7 @@ function formatDateFr(): string {
 }
 
 export default function DashboardHeader() {
-  const { profile } = useHousehold()
+  const { profile, isDemo } = useHousehold()
 
   return (
     <div className="flex items-center justify-between">
@@ -25,7 +25,7 @@ export default function DashboardHeader() {
       >
         {formatDateFr()}
       </span>
-      {profile && <ProfileHeaderButton babyName={profile.babyName} />}
+      {profile && <ProfileHeaderButton babyName={profile.babyName} isDemo={isDemo} />}
     </div>
   )
 }

@@ -33,7 +33,7 @@ export default function KpiCardSleep({ onTap, onPlusTap }: KpiCardSleepProps) {
 
     const cycleEvents = eventsInCycle(events)
     const sleepEvents = cycleEvents.filter(
-      (e) => e.type === 'nap' || e.type === 'night',
+      (e) => e.type === 'nap' || e.type === 'night' || e.type === 'night-sleep',
     )
 
     // Sum completed sleep durations (value is in minutes)

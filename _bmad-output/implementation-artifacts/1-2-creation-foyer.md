@@ -1,6 +1,6 @@
 # Story 1.2: Création de foyer (onboarding complet)
 
-Status: review
+Status: done
 
 ## Story
 

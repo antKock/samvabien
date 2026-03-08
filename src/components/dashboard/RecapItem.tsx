@@ -14,6 +14,7 @@ const EVENT_LABELS: Record<string, string> = {
   nap: 'Sieste',
   night: 'Nuit',
   'night-wake': 'Réveil nocturne',
+  'night-sleep': 'Nuit',
 }
 
 interface RecapItemProps {
@@ -30,7 +31,7 @@ export default function RecapItem({ event, onTap }: RecapItemProps) {
 
   // Time display
   let timeDisplay: string
-  const hasRange = (event.type === 'night' || event.type === 'night-wake') && event.startedAt && event.endedAt
+  const hasRange = (event.type === 'night' || event.type === 'night-wake' || event.type === 'night-sleep') && event.startedAt && event.endedAt
   if (hasRange) {
     timeDisplay = `${formatTime(new Date(event.startedAt!))}–${formatTime(new Date(event.endedAt!))}`
   } else if (event.startedAt) {
@@ -55,7 +56,7 @@ export default function RecapItem({ event, onTap }: RecapItemProps) {
         gap: '8px',
         padding: '8px 0',
         borderBottom: '1px solid var(--border)',
-        cursor: 'default',
+        cursor: 'pointer',
       }}
     >
       {/* Dot */}

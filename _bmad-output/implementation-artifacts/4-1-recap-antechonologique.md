@@ -1,6 +1,6 @@
 # Story 4.1: Récap antéchronologique des événements
 
-Status: review
+Status: done
 
 ## Story
 

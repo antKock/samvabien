@@ -2,7 +2,7 @@ export type SleepState = 'awake' | 'nap' | 'night' | 'night-wake' | 'night-sleep
 
 export type Moment = 'morning' | 'noon' | 'afternoon'
 
-export type EventType = 'bottle' | 'nap' | 'night' | 'night-wake'
+export type EventType = 'bottle' | 'nap' | 'night' | 'night-wake' | 'night-sleep'
 
 export interface Profile {
   id: string

@@ -81,6 +81,7 @@ export function useDemo() {
       nap: 'nap',
       night: 'night',
       'night-wake': 'night-wake',
+      'night-sleep': 'night-sleep',
     }
     const eventType = eventTypeMap[newState]
     const newEvent: BabyEvent = {

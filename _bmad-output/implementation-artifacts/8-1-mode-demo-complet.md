@@ -1,6 +1,6 @@
 # Story 8.1: Mode démo complet
 
-Status: review
+Status: done
 
 ## Story
 

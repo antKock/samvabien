@@ -1,6 +1,6 @@
 # Story 1.5: Gestion des appareils & quitter le foyer
 
-Status: review
+Status: done
 
 ## Story
 

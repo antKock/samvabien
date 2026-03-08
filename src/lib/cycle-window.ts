@@ -95,7 +95,7 @@ export function rollingAverage(
     dayEnd.setHours(contextHour, 0, 0, 0)
 
     for (const event of events) {
-      if (event.type !== type && !(type === 'nap' && event.type === 'night')) continue
+      if (event.type !== type && !(type === 'nap' && (event.type === 'night' || event.type === 'night-sleep'))) continue
 
       const t = getEventTime(event)
       if (!t) continue

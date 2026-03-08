@@ -15,6 +15,7 @@ const TOAST_TITLES: Record<EventType, { emoji: string; label: string }> = {
   nap: { emoji: '😴', label: 'Sieste' },
   night: { emoji: '🌙', label: 'Nuit' },
   'night-wake': { emoji: '🌙', label: 'Réveil nocturne' },
+  'night-sleep': { emoji: '🌙', label: 'Nuit' },
 }
 
 interface ToastEditProps {

@@ -1,6 +1,6 @@
 # Story 2.1: Machine d'états sommeil & API transition
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 1.1: Landing screen & fondation projet
 
-Status: review
+Status: done
 
 ## Story
 

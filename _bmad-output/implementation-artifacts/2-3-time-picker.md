@@ -1,6 +1,6 @@
 # Story 2.3: Time picker & ajustement horaire
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 7.1: Supabase Realtime — sync inter-appareils
 
-Status: review
+Status: done
 
 ## Story
 

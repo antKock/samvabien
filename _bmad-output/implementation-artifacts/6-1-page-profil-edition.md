@@ -1,6 +1,6 @@
 # Story 6.1: Page profil — édition informations bébé
 
-Status: review
+Status: done
 
 ## Story
 

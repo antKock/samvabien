@@ -1,6 +1,6 @@
 # Story 4.3: Suppression avec undo
 
-Status: review
+Status: done
 
 ## Story
 

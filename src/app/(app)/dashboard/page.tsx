@@ -19,7 +19,7 @@ import type { BabyEvent } from '@/types'
 import { getCookie, setCookie } from '@/lib/cookies'
 
 export default function DashboardPage() {
-  const { profile, isLoading, error, clearError, removeEventLocally, restoreEvent, deleteEvent } = useHousehold()
+  const { profile, isLoading, isDemo, error, clearError, removeEventLocally, restoreEvent, deleteEvent } = useHousehold()
   const [showBanner, setShowBanner] = useState(() => !getCookie('pousse_welcome_dismissed'))
   const [isToastOpen, setIsToastOpen] = useState(false)
   const [isBottleToastOpen, setIsBottleToastOpen] = useState(false)
@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      {showBanner && profile && (
+      {showBanner && profile && !isDemo && (
         <WelcomeBanner
           joinCode={profile.joinCode}
           onDismiss={handleDismissBanner}

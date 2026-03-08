@@ -1,6 +1,6 @@
 # Story 1.3: Rejoindre un foyer
 
-Status: review
+Status: done
 
 ## Story
 

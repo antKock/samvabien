@@ -1,6 +1,6 @@
 # Story 6.2: Rappel de pesée mensuel
 
-Status: review
+Status: done
 
 ## Story
 

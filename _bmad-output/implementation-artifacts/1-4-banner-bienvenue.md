@@ -1,6 +1,6 @@
 # Story 1.4: Banner de bienvenue & partage du code
 
-Status: review
+Status: done
 
 ## Story
 
