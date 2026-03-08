@@ -130,7 +130,18 @@ body {
   to   { stroke-dashoffset: var(--perim); }
 }
 
-/* Toast time adjust buttons — enlarged touch target */
+/* Toast time adjust buttons — sizing + enlarged touch target */
+.toast-time-btn {
+  width: 44px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+}
 .toast-time-btn::before {
   content: '';
   position: absolute;

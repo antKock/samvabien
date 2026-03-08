@@ -119,19 +119,21 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
       />
 
       {/* Time or Moment selector */}
-      <div className="mt-3">
+      <div className="mt-3 text-center">
         {hasMoment ? (
           <MomentSelector value={selectedMoment} onChange={setSelectedMoment} />
         ) : (
           <>
-            <button
-              onClick={handleTimeClick}
-              className="text-text font-bold text-lg"
-            >
-              {formatTime(selectedTime)}
-            </button>
+            {!isPickerOpen && (
+              <button
+                onClick={handleTimeClick}
+                className="text-text font-bold text-lg"
+              >
+                {formatTime(selectedTime)}
+              </button>
+            )}
             {isPickerOpen && (
-              <div className="mt-3">
+              <div>
                 <TimePicker
                   initialTime={selectedTime}
                   onConfirm={handleTimeConfirm}

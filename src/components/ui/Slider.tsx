@@ -23,6 +23,7 @@ export default function Slider({ value, onChange, min, max, step, accentColor, u
           left: `${pct}%`,
           transform: 'translateX(-50%)',
           fontSize: '14px',
+          whiteSpace: 'nowrap',
         }}
       >
         {formatValue ? formatValue(value) : `${value} ${unit}`}

@@ -31,7 +31,7 @@ export default function RecapItem({ event, onTap }: RecapItemProps) {
 
   // Time display
   let timeDisplay: string
-  const hasRange = (event.type === 'night' || event.type === 'night-wake' || event.type === 'night-sleep') && event.startedAt && event.endedAt
+  const hasRange = (event.type === 'nap' || event.type === 'night' || event.type === 'night-wake' || event.type === 'night-sleep') && event.startedAt && event.endedAt
   if (hasRange) {
     timeDisplay = `${formatTime(new Date(event.startedAt!))}–${formatTime(new Date(event.endedAt!))}`
   } else if (event.startedAt) {

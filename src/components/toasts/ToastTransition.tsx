@@ -36,8 +36,9 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
   }, [primary, alt])
 
   const handleBackdropTap = useCallback(() => {
+    if (isPickerOpen) return
     confirmTransition()
-  }, [confirmTransition])
+  }, [confirmTransition, isPickerOpen])
 
   const handleCancel = useCallback(() => {
     onClose()
@@ -57,8 +58,8 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
       category="sleep"
       onDismiss={handleCancel}
       onBackdropTap={handleBackdropTap}
-      cooldownDuration={5000}
-      cooldownActive
+      cooldownDuration={2500}
+      cooldownActive={!isPickerOpen}
       onCooldownComplete={confirmTransition}
     >
       {/* Cancel button */}
@@ -99,15 +100,6 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
           onClick={() => setSelectedTime(prev => new Date(prev.getTime() - 60_000))}
           className="toast-time-btn"
           style={{
-            width: 32,
-            height: 28,
-            borderRadius: 8,
-            border: 'none',
-            fontSize: 11,
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            position: 'relative',
             background: 'color-mix(in srgb, var(--sleep-accent) 15%, transparent)',
             color: 'var(--sleep-icon)',
           }}
@@ -124,35 +116,11 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
           onClick={() => setSelectedTime(prev => new Date(prev.getTime() + 60_000))}
           className="toast-time-btn"
           style={{
-            width: 32,
-            height: 28,
-            borderRadius: 8,
-            border: 'none',
-            fontSize: 11,
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            position: 'relative',
             background: 'color-mix(in srgb, var(--sleep-accent) 15%, transparent)',
             color: 'var(--sleep-icon)',
           }}
         >
           +1
-        </button>
-      </div>
-
-      {/* Confirm button */}
-      <div className="mt-3 flex justify-center">
-        <button
-          onClick={confirmTransition}
-          className="px-6 py-2 rounded-full font-bold text-sm"
-          style={{
-            backgroundColor: 'var(--sleep-accent)',
-            color: 'var(--surface)',
-            border: 'none',
-          }}
-        >
-          Confirmer
         </button>
       </div>
 

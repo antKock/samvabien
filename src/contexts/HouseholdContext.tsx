@@ -135,10 +135,11 @@ function ApiHouseholdProvider({ children }: { children: ReactNode }) {
 
         const json = await res.json()
         if (json.data.event) {
-          setState((s) => ({
-            ...s,
-            events: [json.data.event, ...s.events],
-          }))
+          setState((s) => {
+            // Skip if realtime already inserted this event
+            if (s.events.some((e) => e.id === json.data.event.id)) return s
+            return { ...s, events: [json.data.event, ...s.events] }
+          })
         }
       } catch {
         // Rollback + error feedback
@@ -183,11 +184,12 @@ function ApiHouseholdProvider({ children }: { children: ReactNode }) {
         }
 
         const json = await res.json()
-        // Replace temp event with server event
-        setState((s) => ({
-          ...s,
-          events: s.events.map((e) => (e.id === tempId ? json.data.event : e)),
-        }))
+        // Replace temp event with server event, deduplicate if realtime already inserted
+        setState((s) => {
+          const updated = s.events.map((e) => (e.id === tempId ? json.data.event : e))
+          const seen = new Set<string>()
+          return { ...s, events: updated.filter((e) => { if (seen.has(e.id)) return false; seen.add(e.id); return true }) }
+        })
       } catch {
         setState((s) => ({ ...s, events: prevEvents, error: 'Erreur réseau — l\'événement n\'a pas été enregistré' }))
       }

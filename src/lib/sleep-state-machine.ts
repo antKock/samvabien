@@ -52,10 +52,10 @@ export function getNextTransitions(state: SleepState, hour: number): TransitionR
 
 /**
  * Returns the theme based on sleep state.
- * awake → day, everything else → night
+ * night/night-wake/night-sleep → night, everything else (awake/nap) → day
  */
 export function getTheme(state: SleepState): 'day' | 'night' {
-  return state === 'awake' ? 'day' : 'night'
+  return state === 'night' || state === 'night-wake' || state === 'night-sleep' ? 'night' : 'day'
 }
 
 /**

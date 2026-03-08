@@ -50,8 +50,9 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
   }, [mlValue, selectedTime, addEvent, onClose])
 
   const handleBackdropTap = useCallback(() => {
+    if (isPickerOpen) return
     confirm()
-  }, [confirm])
+  }, [confirm, isPickerOpen])
 
   const handleCancel = useCallback(() => {
     onClose()
@@ -71,8 +72,8 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
       category="milk"
       onDismiss={handleCancel}
       onBackdropTap={handleBackdropTap}
-      cooldownDuration={5000}
-      cooldownActive
+      cooldownDuration={2500}
+      cooldownActive={!isPickerOpen}
       onCooldownComplete={confirm}
     >
       {/* Cancel button */}
@@ -125,15 +126,6 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
           onClick={() => setSelectedTime(prev => new Date(prev.getTime() - 60_000))}
           className="toast-time-btn"
           style={{
-            width: 32,
-            height: 28,
-            borderRadius: 8,
-            border: 'none',
-            fontSize: 11,
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            position: 'relative',
             background: 'color-mix(in srgb, var(--milk-accent) 15%, transparent)',
             color: 'var(--milk-icon)',
           }}
@@ -150,35 +142,11 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
           onClick={() => setSelectedTime(prev => new Date(prev.getTime() + 60_000))}
           className="toast-time-btn"
           style={{
-            width: 32,
-            height: 28,
-            borderRadius: 8,
-            border: 'none',
-            fontSize: 11,
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            position: 'relative',
             background: 'color-mix(in srgb, var(--milk-accent) 15%, transparent)',
             color: 'var(--milk-icon)',
           }}
         >
           +1
-        </button>
-      </div>
-
-      {/* Confirm button */}
-      <div className="mt-3 flex justify-center">
-        <button
-          onClick={confirm}
-          className="px-6 py-2 rounded-full font-bold text-sm"
-          style={{
-            backgroundColor: 'var(--milk-accent)',
-            color: 'var(--surface)',
-            border: 'none',
-          }}
-        >
-          Confirmer
         </button>
       </div>
 

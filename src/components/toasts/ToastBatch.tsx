@@ -37,7 +37,7 @@ export default function ToastBatch({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleNext = useCallback(async () => {
-    if (isSubmitting) return
+    if (isSubmitting || !selectedMoment) return
     setIsSubmitting(true)
     try {
       await addEvent({
@@ -53,7 +53,7 @@ export default function ToastBatch({
   }, [value, selectedMoment, addEvent, defaultValue, eventType, isSubmitting])
 
   const handleFinish = useCallback(async () => {
-    if (isSubmitting) return
+    if (isSubmitting || !selectedMoment) return
     setIsSubmitting(true)
     try {
       await addEvent({
@@ -140,28 +140,28 @@ export default function ToastBatch({
       <div className="mt-4 flex gap-3">
         <button
           onClick={handleNext}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !selectedMoment}
           className="flex-1 rounded-full py-2 font-bold"
           style={{
             fontSize: '15px',
             border: `2px solid ${accentColor}`,
             color: accentColor,
             backgroundColor: 'transparent',
-            opacity: isSubmitting ? 0.5 : 1,
+            opacity: isSubmitting || !selectedMoment ? 0.5 : 1,
           }}
         >
           Suivant
         </button>
         <button
           onClick={handleFinish}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !selectedMoment}
           className="flex-1 rounded-full py-2 font-bold"
           style={{
             fontSize: '15px',
             backgroundColor: accentColor,
             color: 'var(--surface)',
             border: 'none',
-            opacity: isSubmitting ? 0.5 : 1,
+            opacity: isSubmitting || !selectedMoment ? 0.5 : 1,
           }}
         >
           Terminer
