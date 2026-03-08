@@ -42,6 +42,7 @@ export default function ToastBatchMilk({ onClose }: ToastBatchMilkProps) {
       sliderMin={range.min}
       sliderMax={range.max}
       sliderStep={range.step}
+      category="milk"
     />
   )
 }

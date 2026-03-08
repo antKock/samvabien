@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import Toast from '@/components/ui/Toast'
+import Toast, { type ToastCategory } from '@/components/ui/Toast'
 import Slider from '@/components/ui/Slider'
 import MomentSelector from '@/components/ui/MomentSelector'
 import { useHousehold } from '@/hooks/useHousehold'
@@ -16,6 +16,7 @@ interface ToastBatchProps {
   sliderMax: number
   sliderStep: number
   formatValue?: (value: number) => string
+  category: ToastCategory
 }
 
 export default function ToastBatch({
@@ -27,6 +28,7 @@ export default function ToastBatch({
   sliderMax,
   sliderStep,
   formatValue,
+  category,
 }: ToastBatchProps) {
   const { addEvent } = useHousehold()
 
@@ -70,18 +72,34 @@ export default function ToastBatch({
   }, [onClose])
 
   return (
-    <Toast onDismiss={handleDismiss} onBackdropTap={handleDismiss}>
+    <Toast category={category} onDismiss={handleDismiss} onBackdropTap={handleDismiss}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={handleDismiss}
-          className="text-text-sec text-xl p-2"
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            border: 'none',
+            background: `color-mix(in srgb, ${accentColor} 15%, transparent)`,
+            color: category === 'milk' ? 'var(--milk-icon)' : 'var(--sleep-icon)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 14,
+            fontWeight: 600,
+          }}
           aria-label="Fermer"
         >
           ✕
         </button>
         <div className="flex items-center gap-2">
-          {/* Import icon SVG */}
           <svg
             width="20"
             height="20"

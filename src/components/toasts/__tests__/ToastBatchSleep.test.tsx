@@ -106,11 +106,10 @@ describe('ToastBatchSleep', () => {
 
   it('backdrop tap ferme sans enregistrer', () => {
     const onClose = vi.fn()
-    const { container } = render(<ToastBatchSleep onClose={onClose} />)
+    render(<ToastBatchSleep onClose={onClose} />)
 
-    const backdrop = container.querySelector('.bg-black\\/30')
-    expect(backdrop).toBeTruthy()
-    fireEvent.click(backdrop!)
+    // Tap outside the toast (mousedown on document body)
+    fireEvent.mouseDown(document.body)
 
     expect(onClose).toHaveBeenCalledOnce()
     expect(mockAddEvent).not.toHaveBeenCalled()

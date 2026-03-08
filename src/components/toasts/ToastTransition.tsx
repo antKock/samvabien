@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import Toast from '@/components/ui/Toast'
-import CooldownButton, { type CooldownButtonHandle } from '@/components/ui/CooldownButton'
 import TimePicker from '@/components/ui/TimePicker'
 import { useHousehold } from '@/hooks/useHousehold'
 import { getNextTransitions } from '@/lib/sleep-state-machine'
@@ -24,8 +23,6 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
   const [selectedTime, setSelectedTime] = useState<Date>(now)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
 
-  const cooldownRef = useRef<CooldownButtonHandle>(null)
-
   const confirmTransition = useCallback(async () => {
     await transitionSleepState(primary.targetState, selectedTime.toISOString())
     onClose()
@@ -36,11 +33,9 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
     const prevPrimary = primary
     setPrimary(alt)
     setAlt(prevPrimary)
-    cooldownRef.current?.reset()
   }, [primary, alt])
 
   const handleBackdropTap = useCallback(() => {
-    // Backdrop tap = confirm primary (same as cooldown expire)
     confirmTransition()
   }, [confirmTransition])
 
@@ -50,43 +45,114 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
 
   const handleTimeClick = useCallback(() => {
     setIsPickerOpen(true)
-    cooldownRef.current?.pause()
   }, [])
 
   const handleTimeConfirm = useCallback((time: Date) => {
     setSelectedTime(time)
     setIsPickerOpen(false)
-    cooldownRef.current?.reset()
   }, [])
 
   return (
-    <Toast onDismiss={handleCancel} onBackdropTap={handleBackdropTap}>
-      <div className="flex items-center justify-between">
-        {/* Cancel button */}
+    <Toast
+      category="sleep"
+      onDismiss={handleCancel}
+      onBackdropTap={handleBackdropTap}
+      cooldownDuration={5000}
+      cooldownActive
+      onCooldownComplete={confirmTransition}
+    >
+      {/* Cancel button */}
+      <button
+        onClick={handleCancel}
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          border: 'none',
+          background: 'color-mix(in srgb, var(--sleep-accent) 15%, transparent)',
+          color: 'var(--sleep-icon)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          fontSize: 14,
+          fontWeight: 600,
+        }}
+        aria-label="Annuler"
+      >
+        ↩
+      </button>
+
+      {/* Primary action */}
+      <div className="text-center" style={{ marginTop: 4 }}>
+        <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 4 }}>{primary.emoji}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{primary.label}</div>
+      </div>
+
+      {/* Time display with ±1 buttons */}
+      <div className="flex items-center justify-center gap-2 mt-3">
         <button
-          onClick={handleCancel}
-          className="text-text-sec text-xl p-2"
-          aria-label="Annuler"
+          onClick={() => setSelectedTime(prev => new Date(prev.getTime() - 60_000))}
+          className="toast-time-btn"
+          style={{
+            width: 32,
+            height: 28,
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 11,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            position: 'relative',
+            background: 'color-mix(in srgb, var(--sleep-accent) 15%, transparent)',
+            color: 'var(--sleep-icon)',
+          }}
         >
-          ↩
+          -1
         </button>
-
-        {/* Primary action with cooldown */}
-        <CooldownButton
-          ref={cooldownRef}
-          duration={5000}
-          onExpire={confirmTransition}
-          onTap={confirmTransition}
-          label={primary.label}
-          emoji={primary.emoji}
-        />
-
-        {/* Time display (tappable for time picker — Story 2.3) */}
         <button
           onClick={handleTimeClick}
           className="text-text font-bold text-lg"
         >
           {formatTime(selectedTime)}
+        </button>
+        <button
+          onClick={() => setSelectedTime(prev => new Date(prev.getTime() + 60_000))}
+          className="toast-time-btn"
+          style={{
+            width: 32,
+            height: 28,
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 11,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            position: 'relative',
+            background: 'color-mix(in srgb, var(--sleep-accent) 15%, transparent)',
+            color: 'var(--sleep-icon)',
+          }}
+        >
+          +1
+        </button>
+      </div>
+
+      {/* Confirm button */}
+      <div className="mt-3 flex justify-center">
+        <button
+          onClick={confirmTransition}
+          className="px-6 py-2 rounded-full font-bold text-sm"
+          style={{
+            backgroundColor: 'var(--sleep-accent)',
+            color: 'var(--surface)',
+            border: 'none',
+          }}
+        >
+          Confirmer
         </button>
       </div>
 
@@ -95,8 +161,11 @@ export default function ToastTransition({ onClose }: ToastTransitionProps) {
         <div className="mt-3 flex justify-center">
           <button
             onClick={handleSwapAlt}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface text-text-sec text-sm font-semibold"
-            style={{ border: '1px solid var(--border)' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-text-sec text-sm font-semibold"
+            style={{
+              background: 'color-mix(in srgb, var(--sleep-accent) 10%, transparent)',
+              border: '1px solid var(--border)',
+            }}
           >
             <span>{alt.emoji}</span>
             <span>{alt.label}</span>

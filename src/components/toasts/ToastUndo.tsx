@@ -1,30 +1,24 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import type { ToastCategory } from '@/components/ui/Toast'
 
 interface ToastUndoProps {
   onConfirm: () => void
   onCancel: () => void
+  category?: ToastCategory
 }
 
-export default function ToastUndo({ onConfirm, onCancel }: ToastUndoProps) {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const onConfirmRef = useRef(onConfirm)
-  onConfirmRef.current = onConfirm
-  const [started, setStarted] = useState(false)
-
-  useEffect(() => {
-    // Trigger animation on next frame
-    requestAnimationFrame(() => setStarted(true))
-    timerRef.current = setTimeout(() => onConfirmRef.current(), 2000)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [])
-
+export default function ToastUndo({ onConfirm, onCancel, category = 'sleep' }: ToastUndoProps) {
   return (
-    <Toast onDismiss={onConfirm} onBackdropTap={onConfirm}>
+    <Toast
+      category={category}
+      onDismiss={onConfirm}
+      onBackdropTap={onConfirm}
+      cooldownDuration={2000}
+      cooldownActive
+      onCooldownComplete={onConfirm}
+    >
       <div className="flex items-center justify-between">
         <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text)' }}>
           🗑️ Supprimé
@@ -40,25 +34,6 @@ export default function ToastUndo({ onConfirm, onCancel }: ToastUndoProps) {
         >
           Annuler
         </button>
-      </div>
-      {/* Cooldown progress bar */}
-      <div
-        style={{
-          marginTop: '8px',
-          height: '2px',
-          backgroundColor: 'var(--border)',
-          borderRadius: '1px',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            height: '100%',
-            backgroundColor: 'var(--text-sec)',
-            width: started ? '0%' : '100%',
-            transition: 'width 2s linear',
-          }}
-        />
       </div>
     </Toast>
   )

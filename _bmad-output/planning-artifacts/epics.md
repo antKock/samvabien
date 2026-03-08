@@ -968,3 +968,107 @@ So that je peux voir comment elle fonctionne avant de créer mon propre profil.
 **Given** je suis en mode démo
 **When** j'observe les fonctionnalités absentes
 **Then** il n'y a pas de code d'invitation, pas de multi-appareil (ces features n'ont pas de sens en démo)
+
+---
+
+## Epic 9 — Alignement Design × Implémentation
+
+**Objectif** : Corriger les 20 écarts identifiés entre la maquette de référence (`docs/design-reference.html`) et le code implémenté, afin de rétablir l'identité visuelle et les interactions prévues dans le design.
+
+**Audit de référence** : `docs/audit-design-vs-implementation.md`
+
+**Priorité** : Critique — L'identité visuelle de l'app est compromise.
+
+### FR Coverage
+
+Pas de nouvelles FR. Cet epic corrige l'implémentation des FR existantes pour les aligner avec le design approuvé.
+
+| Écarts | Stories |
+|---|---|
+| C1, C2, C3 (Critiques) | 9-1, 9-2 |
+| H1, H2, H3, H4, H5 (Hautes) | 9-3, 9-4 |
+| M1–M9 (Moyennes) | 9-1, 9-3, 9-5, 9-6 |
+| B1, B2, B3 (Basses) | 9-2, 9-6 |
+
+### Stories
+
+| Story | Titre | Écarts couverts | Priorité | Dépendances |
+|---|---|---|---|---|
+| **9-1** | Fondation thème : variables CSS manquantes + gradients page | C2, C3, M3 | Critique | — |
+| **9-2** | Hero Card : gradient, shadow, layout durée | C1, B2, B3 | Critique | 9-1 |
+| **9-3** | Toast floating + cooldown border SVG rect arrondi | H2, H4, M1 (toasts) | Haute | 9-1 |
+| **9-4** | Toast interactions : boutons ±1min, animation juice, tap hors toast | H1, H3, H5 | Haute | 9-3 |
+| **9-5** | KPI cards & Progress bar : range colors, checkmark, import icon | M2, M3, M4, M5, M6 | Moyenne | 9-1 |
+| **9-6** | Polish : formats durée/heure, emoji night-wake, feuilles landing | M7, M8, M9, B1 | Moyenne | — |
+
+### Ordre d'exécution
+
+```
+9-1 ──→ 9-2
+  │
+  ├──→ 9-3 ──→ 9-4
+  │
+  └──→ 9-5
+
+9-6 (indépendant, parallélisable)
+```
+
+### Story 9.1 — Fondation thème : variables CSS manquantes + gradients page
+
+**As a** parent,
+**I want** que l'app ait un fond subtilement dégradé et des couleurs de range/target distinctes par catégorie,
+**So that** l'identité visuelle de samvabien soit cohérente avec le design.
+
+**Écarts corrigés** : C2 (couleurs range/target absentes), C3 (gradients page absents), M3 (progress bar zone target sans bordure)
+
+**Fichiers** : `globals.css`, `ProgressBar.tsx`
+
+### Story 9.2 — Hero Card : gradient, shadow, layout durée
+
+**As a** parent,
+**I want** que la hero card affiche un gradient vert forêt signature avec une typographie hiérarchisée,
+**So that** le dashboard ait l'identité visuelle forte prévue dans le design.
+
+**Écarts corrigés** : C1 (fond plat → gradient), B2 (emoji 32px → 28px), B3 (subtitle 12px → 9px)
+
+**Fichiers** : `HeroCard.tsx`
+
+### Story 9.3 — Toast floating + cooldown border SVG rect arrondi
+
+**As a** parent,
+**I want** que le toast apparaisse comme un élément flottant avec une bordure cooldown animée,
+**So that** l'interaction soit légère et le temps restant clairement visible.
+
+**Écarts corrigés** : H2 (cercle → rect arrondi), H4 (modal → floating), M1 (border-radius toasts)
+
+**Fichiers** : `Toast.tsx`, tous les toasts, nouveau `CooldownBorder.tsx`
+
+### Story 9.4 — Toast interactions : boutons ±1min, animation juice, tap hors toast
+
+**As a** parent,
+**I want** pouvoir ajuster rapidement l'heure avec ±1 minute et voir une animation fluide,
+**So that** l'interaction soit rapide et satisfaisante.
+
+**Écarts corrigés** : H1 (boutons ±1 absents), H3 (animation simplifiée), H5 (tap hors toast)
+
+**Fichiers** : `globals.css`, `ToastTransition.tsx`, `ToastBottle.tsx`, `Toast.tsx`
+
+### Story 9.5 — KPI cards & Progress bar : range colors, checkmark, import icon
+
+**As a** parent,
+**I want** que les cartes KPI affichent les éléments visuels conformes (checkmark plein, icône import SVG, bordures de zone),
+**So that** l'interface soit soignée et les informations immédiatement compréhensibles.
+
+**Écarts corrigés** : M2 (+ → SVG import), M3 (bordure zone), M4 (shadow now), M5 (bordure avg), M6 (checkmark stroke → badge)
+
+**Fichiers** : `ProgressBar.tsx`, `KpiCardMilk.tsx`, `KpiCardSleep.tsx`
+
+### Story 9.6 — Polish : formats durée/heure, emoji night-wake, feuilles landing
+
+**As a** parent francophone,
+**I want** que les durées et heures soient dans le format compact français standard,
+**So that** l'affichage soit naturel ("1h23", "14h30") et l'app visuellement complète.
+
+**Écarts corrigés** : M7 (format durée), M8 (emoji 🌙 → 🫣), M9 (format heure), B1 (feuilles landing)
+
+**Fichiers** : `format.ts`, `ToastEdit.tsx`, `LandingScreen.tsx`

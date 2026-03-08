@@ -6,6 +6,7 @@ interface ProgressBarProps {
   avg?: number
   accentColor: string
   trackColor: string
+  category: 'sleep' | 'milk'
 }
 
 export default function ProgressBar({
@@ -14,6 +15,7 @@ export default function ProgressBar({
   avg,
   accentColor,
   trackColor,
+  category,
 }: ProgressBarProps) {
   // Bar max = target.max * 1.2 (20% margin beyond target zone)
   const barMax = target.max * 1.2
@@ -30,15 +32,15 @@ export default function ProgressBar({
         style={{ backgroundColor: trackColor, borderRadius: 4 }}
       />
 
-      {/* Target zone (shaded) */}
+      {/* Target zone */}
       <div
         className="absolute top-0 bottom-0"
         style={{
           left: `${targetMinPct}%`,
           width: `${targetMaxPct - targetMinPct}%`,
-          backgroundColor: accentColor,
-          opacity: 0.2,
-          borderRadius: 4,
+          backgroundColor: `var(--${category}-range-bg)`,
+          border: `1px solid var(--${category}-range-border)`,
+          borderRadius: 3,
         }}
       />
 
@@ -64,6 +66,7 @@ export default function ProgressBar({
             height: 10,
             borderRadius: '50%',
             backgroundColor: accentColor,
+            boxShadow: `0 1px 3px color-mix(in srgb, ${accentColor} 30%, transparent)`,
           }}
         />
       )}
@@ -79,8 +82,7 @@ export default function ProgressBar({
             height: 10,
             borderRadius: '50%',
             backgroundColor: trackColor,
-            border: `2px solid ${accentColor}`,
-            opacity: 0.6,
+            border: `2px solid var(--${category}-range-border)`,
           }}
         />
       )}

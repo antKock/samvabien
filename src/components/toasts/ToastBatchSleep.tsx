@@ -44,6 +44,7 @@ export default function ToastBatchSleep({ onClose }: ToastBatchSleepProps) {
       sliderMax={SLEEP_RANGE.max}
       sliderStep={SLEEP_RANGE.step}
       formatValue={formatMinutes}
+      category="sleep"
     />
   )
 }

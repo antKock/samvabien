@@ -121,12 +121,10 @@ describe('ToastBatchMilk', () => {
 
   it('backdrop tap ferme sans enregistrer', () => {
     const onClose = vi.fn()
-    const { container } = render(<ToastBatchMilk onClose={onClose} />)
+    render(<ToastBatchMilk onClose={onClose} />)
 
-    // Click backdrop (the overlay div)
-    const backdrop = container.querySelector('.bg-black\\/30')
-    expect(backdrop).toBeTruthy()
-    fireEvent.click(backdrop!)
+    // Tap outside the toast (mousedown on document body)
+    fireEvent.mouseDown(document.body)
 
     expect(onClose).toHaveBeenCalledOnce()
     expect(mockAddEvent).not.toHaveBeenCalled()

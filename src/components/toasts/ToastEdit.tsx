@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import Toast from '@/components/ui/Toast'
+import Toast, { type ToastCategory } from '@/components/ui/Toast'
 import Slider from '@/components/ui/Slider'
 import TimePicker from '@/components/ui/TimePicker'
 import MomentSelector from '@/components/ui/MomentSelector'
@@ -14,8 +14,12 @@ const TOAST_TITLES: Record<EventType, { emoji: string; label: string }> = {
   bottle: { emoji: '🍼', label: 'Biberon' },
   nap: { emoji: '😴', label: 'Sieste' },
   night: { emoji: '🌙', label: 'Nuit' },
-  'night-wake': { emoji: '🌙', label: 'Réveil nocturne' },
+  'night-wake': { emoji: '🫣', label: 'Réveil nocturne' },
   'night-sleep': { emoji: '🌙', label: 'Nuit' },
+}
+
+function getCategoryForEvent(type: EventType): ToastCategory {
+  return type === 'bottle' ? 'milk' : 'sleep'
 }
 
 interface ToastEditProps {
@@ -28,6 +32,7 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
   const { profile, updateEvent } = useHousehold()
   const isBottle = event.type === 'bottle'
   const title = TOAST_TITLES[event.type]
+  const category = getCategoryForEvent(event.type)
 
   const range = useMemo(
     () => isBottle ? getMilkRange(profile?.babyWeightHg ?? 40) : { min: 5, max: event.type === 'night' ? 720 : 180, step: 5 },
@@ -67,8 +72,10 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
     setIsPickerOpen(false)
   }, [])
 
+  const accent = isBottle ? 'var(--milk-accent)' : 'var(--sleep-accent)'
+
   return (
-    <Toast onDismiss={onClose} onBackdropTap={onClose}>
+    <Toast category={category} onDismiss={onClose} onBackdropTap={onClose}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div style={{ fontSize: '16px', fontWeight: 700 }}>
@@ -76,7 +83,24 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
         </div>
         <button
           onClick={onClose}
-          className="text-text-sec text-xl p-1"
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            border: 'none',
+            background: `color-mix(in srgb, ${accent} 15%, transparent)`,
+            color: isBottle ? 'var(--milk-icon)' : 'var(--sleep-icon)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 14,
+            fontWeight: 600,
+          }}
           aria-label="Fermer"
         >
           ✕
@@ -90,7 +114,7 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
         min={range.min}
         max={range.max}
         step={range.step}
-        accentColor={isBottle ? 'var(--milk-accent)' : 'var(--sleep-accent)'}
+        accentColor={accent}
         unit={isBottle ? 'mL' : 'min'}
       />
 
@@ -135,7 +159,7 @@ export default function ToastEdit({ event, onClose, onDelete }: ToastEditProps) 
           onClick={handleSave}
           className="flex-1 py-2 rounded-full font-bold text-sm"
           style={{
-            backgroundColor: 'var(--accent)',
+            backgroundColor: accent,
             color: 'var(--surface)',
           }}
         >

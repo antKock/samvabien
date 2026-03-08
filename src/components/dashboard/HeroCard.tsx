@@ -2,7 +2,7 @@
 
 import { useHousehold } from '@/hooks/useHousehold'
 import { useSleepChrono } from '@/hooks/useSleepChrono'
-import { getHeroDisplay } from '@/lib/sleep-state-machine'
+import { getHeroDisplay, getTheme } from '@/lib/sleep-state-machine'
 import type { SleepState } from '@/types'
 
 interface HeroCardProps {
@@ -18,32 +18,55 @@ export default function HeroCard({ onTap }: HeroCardProps) {
 
   const liveDuration = useSleepChrono(since)
   const display = getHeroDisplay(sleepState, since, moment)
+  const theme = getTheme(sleepState)
 
-  // Use live duration from useSleepChrono instead of the one-shot duration from getHeroDisplay
-  const label = liveDuration && since
-    ? `${display.baseLabel} depuis ${liveDuration}`
-    : display.label
+  const hasDuration = !!(liveDuration && since)
+  const isDay = theme === 'day'
+
+  // Gradient background
+  const gradient = isDay
+    ? 'linear-gradient(160deg, color-mix(in srgb, var(--hero-g1) 93%, transparent), var(--hero-g3))'
+    : 'linear-gradient(155deg, var(--hero-g1), var(--hero-g3))'
+
+  // Triple shadow
+  const shadow = isDay
+    ? '0 2px 6px color-mix(in srgb, var(--hero-g3) 19%, transparent), 0 8px 20px color-mix(in srgb, var(--hero-g3) 15%, transparent), 0 16px 40px color-mix(in srgb, var(--hero-g3) 8%, transparent)'
+    : '0 2px 6px color-mix(in srgb, var(--hero-g3) 21%, transparent), 0 8px 22px color-mix(in srgb, var(--hero-g3) 15%, transparent), 0 18px 44px color-mix(in srgb, var(--hero-g3) 9%, transparent)'
+
+  // Text colors
+  const textColor = isDay ? 'var(--sleep-bg)' : 'var(--hero-text)'
+  const subtitleColor = isDay ? 'color-mix(in srgb, var(--sleep-bg) 65%, transparent)' : 'var(--hero-text)'
 
   return (
     <button
       onClick={onTap}
-      className="w-full bg-surface rounded-[20px] p-5 text-center cursor-pointer"
+      className="w-full text-center cursor-pointer"
       style={{
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        background: gradient,
+        boxShadow: shadow,
+        borderRadius: 22,
+        padding: hasDuration ? '20px 18px 16px' : '24px 18px 22px',
+        transform: 'translateY(-1px)',
+        border: 'none',
       }}
     >
-      <div className="text-[32px] leading-none mb-2">{display.emoji}</div>
-      <div
-        className="text-hero-text"
-        style={{ fontSize: '20px', fontWeight: 800 }}
-      >
-        {label}
-      </div>
+      <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 3 }}>{display.emoji}</div>
+      {hasDuration ? (
+        <>
+          <div style={{ fontSize: 13, fontWeight: 700, color: textColor }}>
+            {display.baseLabel} depuis
+          </div>
+          <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1, letterSpacing: '-1px', color: textColor }}>
+            {liveDuration}
+          </div>
+        </>
+      ) : (
+        <div style={{ fontSize: 16, fontWeight: 700, color: textColor }}>
+          {display.label}
+        </div>
+      )}
       {display.subtitle && (
-        <div
-          className="text-text-sec mt-1"
-          style={{ fontSize: '12px', fontWeight: 600 }}
-        >
+        <div style={{ fontSize: 9, fontWeight: 600, marginTop: 2, color: subtitleColor }}>
           {display.subtitle}
         </div>
       )}

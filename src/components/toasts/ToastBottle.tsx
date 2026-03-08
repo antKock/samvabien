@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Toast from '@/components/ui/Toast'
-import CooldownButton, { type CooldownButtonHandle } from '@/components/ui/CooldownButton'
 import TimePicker from '@/components/ui/TimePicker'
 import Slider from '@/components/ui/Slider'
 import { useHousehold } from '@/hooks/useHousehold'
@@ -15,7 +14,6 @@ interface ToastBottleProps {
 
 export default function ToastBottle({ onClose }: ToastBottleProps) {
   const { profile, events, addEvent } = useHousehold()
-  const cooldownRef = useRef<CooldownButtonHandle>(null)
 
   const range = useMemo(
     () => getMilkRange(profile?.babyWeightHg ?? 40),
@@ -35,7 +33,6 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
       const avg = bottles.reduce((sum, e) => sum + e.value, 0) / bottles.length
       return Math.round(avg / 10) * 10
     }
-    // Fallback: median of range
     return Math.round((range.min + range.max) / 2 / 10) * 10
   }, [events, range])
 
@@ -62,44 +59,52 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
 
   const handleTimeClick = useCallback(() => {
     setIsPickerOpen(true)
-    cooldownRef.current?.pause()
   }, [])
 
   const handleTimeConfirm = useCallback((time: Date) => {
     setSelectedTime(time)
     setIsPickerOpen(false)
-    cooldownRef.current?.reset()
   }, [])
 
   return (
-    <Toast onDismiss={handleCancel} onBackdropTap={handleBackdropTap}>
-      <div className="flex items-center justify-between">
-        {/* Cancel button */}
-        <button
-          onClick={handleCancel}
-          className="text-text-sec text-xl p-2"
-          aria-label="Annuler"
-        >
-          ↩
-        </button>
+    <Toast
+      category="milk"
+      onDismiss={handleCancel}
+      onBackdropTap={handleBackdropTap}
+      cooldownDuration={5000}
+      cooldownActive
+      onCooldownComplete={confirm}
+    >
+      {/* Cancel button */}
+      <button
+        onClick={handleCancel}
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          border: 'none',
+          background: 'color-mix(in srgb, var(--milk-accent) 15%, transparent)',
+          color: 'var(--milk-icon)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          fontSize: 14,
+          fontWeight: 600,
+        }}
+        aria-label="Annuler"
+      >
+        ↩
+      </button>
 
-        {/* Primary action with cooldown */}
-        <CooldownButton
-          ref={cooldownRef}
-          duration={5000}
-          onExpire={confirm}
-          onTap={confirm}
-          label="Biberon"
-          emoji="🍼"
-        />
-
-        {/* Time display (tappable) */}
-        <button
-          onClick={handleTimeClick}
-          className="text-text font-bold text-lg"
-        >
-          {formatTime(selectedTime)}
-        </button>
+      {/* Header */}
+      <div className="text-center" style={{ marginTop: 4 }}>
+        <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 4 }}>🍼</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Biberon</div>
       </div>
 
       {/* Slider */}
@@ -112,6 +117,69 @@ export default function ToastBottle({ onClose }: ToastBottleProps) {
           step={range.step}
           accentColor="var(--milk-accent)"
         />
+      </div>
+
+      {/* Time display with ±1 buttons */}
+      <div className="flex items-center justify-center gap-2 mt-3">
+        <button
+          onClick={() => setSelectedTime(prev => new Date(prev.getTime() - 60_000))}
+          className="toast-time-btn"
+          style={{
+            width: 32,
+            height: 28,
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 11,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            position: 'relative',
+            background: 'color-mix(in srgb, var(--milk-accent) 15%, transparent)',
+            color: 'var(--milk-icon)',
+          }}
+        >
+          -1
+        </button>
+        <button
+          onClick={handleTimeClick}
+          className="text-text font-bold text-lg"
+        >
+          {formatTime(selectedTime)}
+        </button>
+        <button
+          onClick={() => setSelectedTime(prev => new Date(prev.getTime() + 60_000))}
+          className="toast-time-btn"
+          style={{
+            width: 32,
+            height: 28,
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 11,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            position: 'relative',
+            background: 'color-mix(in srgb, var(--milk-accent) 15%, transparent)',
+            color: 'var(--milk-icon)',
+          }}
+        >
+          +1
+        </button>
+      </div>
+
+      {/* Confirm button */}
+      <div className="mt-3 flex justify-center">
+        <button
+          onClick={confirm}
+          className="px-6 py-2 rounded-full font-bold text-sm"
+          style={{
+            backgroundColor: 'var(--milk-accent)',
+            color: 'var(--surface)',
+            border: 'none',
+          }}
+        >
+          Confirmer
+        </button>
       </div>
 
       {/* Time picker inline */}

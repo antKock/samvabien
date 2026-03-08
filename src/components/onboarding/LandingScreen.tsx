@@ -24,6 +24,14 @@ function BabyIllustration() {
       {/* Zzz */}
       <text x="82" y="36" fill="var(--sleep-icon)" fontSize="14" fontWeight="800" fontFamily="Nunito">z</text>
       <text x="90" y="28" fill="var(--sleep-icon)" fontSize="10" fontWeight="800" fontFamily="Nunito" opacity="0.6">z</text>
+      {/* Leaf 1 — left */}
+      <g transform="translate(12, 55) rotate(-25)">
+        <ellipse cx="10" cy="14" rx="10" ry="14" fill="var(--sleep-accent)" opacity="0.5" />
+      </g>
+      {/* Leaf 2 — right */}
+      <g transform="translate(95, 60) rotate(15)">
+        <ellipse cx="8" cy="11" rx="8" ry="11" fill="var(--sleep-icon)" opacity="0.35" />
+      </g>
     </svg>
   )
 }
