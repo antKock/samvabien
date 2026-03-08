@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap');
+@import "tailwindcss";
+
+/* Day theme (default) */
+[data-theme="day"], :root {
+  --bg: #f6f5ee;
+  --surface: #ffffff;
+  --text: #32321e;
+  --text-sec: #8a8870;
+  --sleep-bg: #eaecda;
+  --sleep-accent: #8a9a6a;
+  --sleep-icon: #6a7a4a;
+  --milk-bg: #f5e6d6;
+  --milk-accent: #c08a60;
+  --milk-icon: #a06840;
+  --hero-text: #4a5a32;
+  --border: rgba(0,0,0,0.06);
+  --track: #dce0cc;
+  --accent: #8a9a6a;
+}
+
+/* Night theme */
+[data-theme="night"] {
+  --bg: #181810;
+  --surface: #22221a;
+  --text: #c8c8b0;
+  --text-sec: #7a7a60;
+  --sleep-bg: #222818;
+  --sleep-accent: #7a8a5a;
+  --sleep-icon: #98a878;
+  --milk-bg: #261e14;
+  --milk-accent: #b08050;
+  --milk-icon: #cca070;
+  --hero-text: #98a878;
+  --border: rgba(255,255,255,0.06);
+  --track: #3e402e;
+  --accent: #7a8a5a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-text-sec: var(--text-sec);
+  --color-sleep-bg: var(--sleep-bg);
+  --color-sleep-accent: var(--sleep-accent);
+  --color-sleep-icon: var(--sleep-icon);
+  --color-milk-bg: var(--milk-bg);
+  --color-milk-accent: var(--milk-accent);
+  --color-milk-icon: var(--milk-icon);
+  --color-hero-text: var(--hero-text);
+  --color-border: var(--border);
+  --color-track: var(--track);
+  --color-accent: var(--accent);
+
+  --font-nunito: 'Nunito', sans-serif;
+
+  --radius-card: 16px;
+  --radius-lg: 20px;
+  --radius-full: 32px;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+}
+
+/* Theme transition — covers background/text on html/body and all themed elements */
+html, body, [class*="bg-"], [class*="text-"] {
+  transition: background-color 0.5s ease, color 0.3s ease, border-color 0.5s ease;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Toast slide-up animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Slider input styling */
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--slider-accent) var(--slider-pct), var(--track) var(--slider-pct));
+  outline: none;
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--slider-accent);
+  cursor: pointer;
+  border: none;
+}
+.slider-input::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--slider-accent);
+  cursor: pointer;
+  border: none;
+}

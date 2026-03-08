@@ -180,6 +180,9 @@
   <a href="#s-profil">Accès Profil</a>
   <a href="#s-profil-page">Profil enfant</a>
   <a href="#s-onboarding">Onboarding</a>
+  <a href="#s-welcome">Welcome Banner</a>
+  <a href="#s-join">Rejoindre</a>
+  <a href="#s-profil-edit">Profil édition</a>
   <a href="#s-demo">Démo bar</a>
   <a href="#s-hero-import">Hero post-import</a>
 </nav>
@@ -216,6 +219,15 @@
 
 <h2 class="section-title" id="s-onboarding">Onboarding</h2>
 <div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="onboarding-demo"></div>
+
+<h2 class="section-title" id="s-welcome">Welcome Banner — Post-création</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="welcome-demo"></div>
+
+<h2 class="section-title" id="s-join">Rejoindre un foyer</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="join-demo"></div>
+
+<h2 class="section-title" id="s-profil-edit">Profil — État édition</h2>
+<div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="profil-edit-demo"></div>
 
 <h2 class="section-title" id="s-demo">Démo bar</h2>
 <div style="display:flex;flex-direction:column;gap:24px;padding:8px 16px 40px" id="demo-bar-demo"></div>
@@ -1088,7 +1100,7 @@ function renderProfilePage(colors, night) {
     ${sectionTitle('Foyer')}
     <div style="padding:10px 0;border-bottom:1px solid ${colors.border || alpha(colors.textSec, 0.12)}">
       <div style="font-size:9px;font-weight:600;color:${colors.textSec};margin-bottom:4px">Code d'invitation</div>
-      <div style="font-size:16px;font-weight:800;color:${colors.text};letter-spacing:1px;margin-bottom:6px">OLIVE-4821</div>
+      <div style="font-size:16px;font-weight:800;color:${colors.text};letter-spacing:1px;margin-bottom:6px">OLVR-4821</div>
       <button style="font-size:10px;font-weight:700;color:${accentColor};background:${alpha(accentColor,0.1)};border:none;border-radius:8px;padding:5px 14px;cursor:pointer;font-family:inherit">Copier le lien</button>
     </div>
 
@@ -1234,6 +1246,167 @@ document.getElementById('onboarding-demo').innerHTML = `
   <div class="phones-row">
     ${profilPhoneWrap(dayC, false, 'Light — Onboarding', renderOnboarding(dayC, false))}
     ${profilPhoneWrap(nightC, true, 'Dark — Onboarding', renderOnboarding(nightC, true))}
+  </div>`;
+
+// ===================== WELCOME BANNER — POST-CRÉATION =====================
+
+function renderWelcomeBanner(colors, night) {
+  const accentColor = colors.sleep.accent;
+  const bannerBg = night ? alpha(colors.surface, 0.12) : alpha(colors.sleep.bg, 0.5);
+  const bannerBorder = alpha(accentColor, 0.25);
+
+  const heroStyle = night
+    ? `background:linear-gradient(155deg, ${colors.heroG1}, ${colors.heroG3});box-shadow:0 2px 6px ${alpha(colors.heroG3,0.21)}, 0 8px 22px ${alpha(colors.heroG3,0.15)}, 0 18px 44px ${alpha(colors.heroG3,0.09)};transform:translateY(-1px)`
+    : `background:linear-gradient(160deg, ${alpha(colors.heroG1,0.93)}, ${colors.heroG3});box-shadow:0 2px 6px ${alpha(colors.heroG3,0.19)}, 0 8px 20px ${alpha(colors.heroG3,0.15)}, 0 16px 40px ${alpha(colors.heroG3,0.08)};transform:translateY(-1px)`;
+
+  return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
+  <div class="phone-inner">
+    <!-- Welcome Banner -->
+    <div style="position:relative;background:${bannerBg};border:1.5px solid ${bannerBorder};border-radius:16px;padding:16px 18px;margin-bottom:12px;text-align:center">
+      <button style="position:absolute;top:8px;right:10px;border:none;background:none;cursor:pointer;font-size:12px;color:${colors.textSec};opacity:0.6">✕</button>
+      <div style="font-size:18px;margin-bottom:6px">🎉</div>
+      <div style="font-size:13px;font-weight:800;color:${colors.text};margin-bottom:4px">Bienvenue !</div>
+      <div style="font-size:10px;font-weight:500;color:${colors.textSec};line-height:1.4;margin-bottom:10px">Partagez ce code pour que l'autre parent<br>puisse rejoindre le foyer :</div>
+      <div style="font-size:16px;font-weight:800;color:${colors.text};letter-spacing:2px;margin-bottom:10px">OLVR-4821</div>
+      <button style="font-size:10px;font-weight:700;color:${accentColor};background:${alpha(accentColor,0.1)};border:1.5px solid ${alpha(accentColor,0.2)};border-radius:10px;padding:7px 20px;cursor:pointer;font-family:inherit">Copier le lien</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 6px">
+      <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Vendredi 7 mars</div>
+      <button style="display:inline-flex;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:inherit;padding:2px 0">
+        <span style="font-size:10px;font-weight:600;color:${colors.textSec}">${BABY_NAME}</span>
+        ${settingsIcon(colors.textSec)}
+      </button>
+    </div>
+    <button style="width:100%;text-align:center;cursor:pointer;font-family:inherit;position:relative;border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;border:none;${heroStyle}">
+      <div style="font-size:28px;margin-bottom:3px">☀️</div>
+      <div style="font-size:13px;font-weight:700;color:${night ? colors.hero.text : colors.sleep.bg}">Éveillé</div>
+      <div style="font-size:9px;font-weight:600;color:${night ? colors.hero.text : alpha(colors.sleep.bg,0.65)};margin-top:2px">En attente du premier événement</div>
+    </button>
+  </div>`;
+}
+
+document.getElementById('welcome-demo').innerHTML = `
+  <div class="phones-row">
+    ${profilPhoneWrap(dayC, false, 'Light — Welcome', renderWelcomeBanner(dayC, false))}
+    ${profilPhoneWrap(nightC, true, 'Dark — Welcome', renderWelcomeBanner(nightC, true))}
+  </div>`;
+
+// ===================== REJOINDRE UN FOYER =====================
+
+function renderJoinScreen(colors, night, state) {
+  const accentColor = colors.sleep.accent;
+  const inputBg = night ? alpha(colors.surface, 0.08) : alpha(colors.textSec, 0.06);
+  const inputBorder = alpha(colors.textSec, 0.15);
+
+  let feedbackHtml = '';
+  if (state === 'empty') {
+    feedbackHtml = '';
+  } else if (state === 'loading') {
+    feedbackHtml = `<div style="text-align:center;padding:16px 0">
+      <div style="font-size:10px;font-weight:600;color:${colors.textSec}">Vérification…</div>
+    </div>`;
+  } else if (state === 'error') {
+    feedbackHtml = `<div style="text-align:center;padding:12px 0">
+      <div style="font-size:10px;font-weight:600;color:#c05050">Code introuvable, vérifiez la saisie</div>
+    </div>`;
+  } else if (state === 'success') {
+    feedbackHtml = `<div style="text-align:center;padding:12px 0">
+      <div style="font-size:18px;margin-bottom:4px">✓</div>
+      <div style="font-size:10px;font-weight:700;color:${accentColor}">Foyer trouvé ! Connexion…</div>
+    </div>`;
+  }
+
+  const inputValue = state === 'empty' ? '' : (state === 'error' ? 'ZXQP-0000' : 'OLVR-4821');
+  const inputContent = inputValue
+    ? `<span style="color:${colors.text}">${inputValue}</span>`
+    : `<span style="opacity:0.4">XXXX-0000</span>`;
+
+  return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
+  <div class="phone-inner">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0 10px">
+      <button style="border:none;background:none;cursor:pointer;padding:0">${chevronLeft(colors.textSec)}</button>
+      <div style="font-size:13px;font-weight:800;color:${colors.text}">Rejoindre un foyer</div>
+    </div>
+
+    <div style="font-size:10px;font-weight:500;color:${colors.textSec};line-height:1.4;margin-bottom:16px">
+      Entrez le code d'invitation partagé par l'autre parent.
+    </div>
+
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Code d'invitation</div>
+      <div style="background:${inputBg};border:1.5px solid ${state === 'error' ? '#c05050' : (state === 'success' ? accentColor : inputBorder)};border-radius:10px;padding:12px 14px;font-size:16px;font-weight:700;color:${colors.text};letter-spacing:2px;text-align:center">${inputContent}</div>
+    </div>
+
+    ${feedbackHtml}
+  </div>`;
+}
+
+document.getElementById('join-demo').innerHTML = `
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:0 0 8px">États du JoinScreen</h3>
+  <div class="phones-row">
+    ${profilPhoneWrap(dayC, false, 'Vide', renderJoinScreen(dayC, false, 'empty'))}
+    ${profilPhoneWrap(dayC, false, 'Chargement', renderJoinScreen(dayC, false, 'loading'))}
+  </div>
+  <div class="phones-row" style="margin-top:12px">
+    ${profilPhoneWrap(dayC, false, 'Erreur', renderJoinScreen(dayC, false, 'error'))}
+    ${profilPhoneWrap(dayC, false, 'Succès', renderJoinScreen(dayC, false, 'success'))}
+  </div>
+  <h3 style="color:#555;font-size:14px;font-weight:700;margin:16px 0 8px">Mode sombre</h3>
+  <div class="phones-row">
+    ${profilPhoneWrap(nightC, true, 'Dark — Vide', renderJoinScreen(nightC, true, 'empty'))}
+    ${profilPhoneWrap(nightC, true, 'Dark — Succès', renderJoinScreen(nightC, true, 'success'))}
+  </div>`;
+
+// ===================== PROFIL — ÉTAT ÉDITION =====================
+
+function renderProfileEdit(colors, night) {
+  const accentColor = colors.sleep.accent;
+  const inputBg = night ? alpha(colors.surface, 0.08) : alpha(colors.textSec, 0.06);
+  const inputBorder = alpha(accentColor, 0.4);
+  const sectionTitle = (text) => `<div style="font-size:9px;font-weight:700;color:${colors.textSec};text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 4px">${text}</div>`;
+
+  return `<div class="status-bar" style="color:${colors.textSec}"><span>${moment.time}</span><span>📶 🔋</span></div>
+  <div class="phone-inner">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0 10px">
+      <button style="border:none;background:none;cursor:pointer;padding:0">${chevronLeft(colors.textSec)}</button>
+      <div style="font-size:13px;font-weight:800;color:${colors.text}">Profil</div>
+    </div>
+
+    ${sectionTitle('Bébé')}
+
+    <!-- Prénom en mode lecture -->
+    ${profileRow(colors, 'Prénom', BABY_NAME, true)}
+
+    <!-- Date de naissance — en mode édition (champ ouvert) -->
+    <div style="padding:10px 0;border-bottom:1px solid ${colors.border || alpha(colors.textSec, 0.12)}">
+      <div style="font-size:9px;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Date de naissance</div>
+      <div style="background:${inputBg};border:1.5px solid ${inputBorder};border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:${colors.text}">7 mars 2026</div>
+    </div>
+
+    <!-- Poids — en mode édition (scroll wheels overlay) -->
+    <div style="padding:10px 0;border-bottom:1px solid ${colors.border || alpha(colors.textSec, 0.12)}">
+      <div style="font-size:9px;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Poids</div>
+      ${weightWheels(colors, night)}
+      <div style="text-align:center">
+        <button style="font-size:11px;font-weight:700;color:white;background:${accentColor};border:none;border-radius:10px;padding:8px 28px;cursor:pointer;font-family:inherit">OK</button>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid ${colors.border || alpha(colors.textSec, 0.12)}">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:${colors.textSec}">Rappel de pesée</div>
+        <div style="font-size:9px;color:${colors.textSec};opacity:0.7">Mensuel · le 17 de chaque mois</div>
+      </div>
+      ${toggleSwitch(true, accentColor)}
+    </div>
+  </div>`;
+}
+
+document.getElementById('profil-edit-demo').innerHTML = `
+  <div class="phones-row">
+    ${profilPhoneWrap(dayC, false, 'Light — Édition poids', renderProfileEdit(dayC, false))}
+    ${profilPhoneWrap(nightC, true, 'Dark — Édition poids', renderProfileEdit(nightC, true))}
   </div>`;
 
 // ===================== DÉMO BAR =====================

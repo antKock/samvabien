@@ -1,8 +1,14 @@
 ---
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
+lastUpdated: 2026-03-07
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-samvabien-2026-03-06.md
   - docs/brief.md
+  - docs/ux-kpi-cards.md
+  - docs/ux-recap-today.md
+  - docs/ux-onboarding-profil.md
+  - docs/ux-sleep-state-machine.md
+  - docs/design-reference.html
 date: 2026-03-06
 author: Anthony
 ---
@@ -35,7 +41,7 @@ samvabien est une PWA mobile one-hand friendly de suivi quotidien du sommeil et 
 
 ### Key Design Challenges
 
-1. **Saisie crèche en contexte réel** — L'information arrive à l'oral en rafale au moment du pickup. Le flow de saisie doit permettre de tout capturer rapidement (siestes, biberons, notes) de mémoire, sans friction, dans l'ordre naturel du débrief.
+1. **Saisie crèche en contexte réel** — L'information arrive à l'oral en rafale au moment du pickup. Le flow de saisie doit permettre de tout capturer rapidement (siestes, biberons) de mémoire, sans friction.
 
 2. **Deux profils utilisateurs, une seule interface** — Concilier l'efficacité data-driven d'Anthony avec la simplicité visuelle et pratique recherchée par sa conjointe, sans compromettre l'un pour l'autre.
 
@@ -45,7 +51,7 @@ samvabien est une PWA mobile one-hand friendly de suivi quotidien du sommeil et 
 
 ### Design Opportunities
 
-1. **Flow crèche guidé et flexible** — Des sections indépendantes (siestes, biberons, notes) accessibles dans n'importe quel ordre, permettant de capturer les infos au fil du débrief sans imposer de séquence — tout en offrant une vue d'ensemble de ce qui a été saisi ou non.
+1. **Flow crèche par CTA `+`** — Chaque KPI card (lait, sommeil) a un bouton d'import dédié. Le toast batch permet de saisir plusieurs entrées en séquence (Suivant/Terminer), avec un moment de la journée optionnel (Matin/Midi/Après-midi).
 
 2. **Dashboard à deux niveaux** — Vue "coup d'œil" par défaut avec les essentiels du jour, extensible vers les tendances par simple scroll ou tap — une seule surface, deux profondeurs d'information.
 
@@ -71,7 +77,7 @@ L'action la plus fréquente est la saisie rapide d'un événement (biberon, déb
 
 1. **Saisie biberon** — Entrer une quantité en mL en moins de 5 secondes, sans navigation
 2. **Saisie sieste** — Un seul tap pour démarrer/arrêter le chrono
-3. **Import crèche** — Capturer le débrief complet (siestes + biberons + notes) en 30 secondes max, dans n'importe quel ordre
+3. **Import crèche** — Capturer le débrief complet (siestes + biberons) en 30 secondes max via les CTA `+`
 4. **Consultation dashboard** — Ouvrir l'app = voir immédiatement le résumé du jour, zéro clic
 5. **Partage implicite** — Plus besoin d'envoyer un SMS avec les infos crèche : la conjointe voit tout apparaître en temps réel dès la saisie
 
@@ -122,10 +128,10 @@ L'action la plus fréquente est la saisie rapide d'un événement (biberon, déb
 
 ### Design Implications
 
-- **Sérénité** → Palette pastel, couleurs douces, pas de rouge/orange alarmiste. Tons neutres pour les données, accent doux (vert tendre, bleu ciel) pour les indicateurs positifs
-- **Libération mentale** → Feedback de confirmation discret après saisie ("✓" subtil), pas de modal de confirmation, retour immédiat au dashboard
+- **Sérénité** → Palette nature/olive, couleurs douces. Vert pour le sommeil, orange/ambre pour le lait. Pas de rouge alarmiste. Le checkmark n'apparaît que quand la zone cible médicale est atteinte — l'absence de checkmark n'est pas un signal négatif
+- **Libération mentale** → Cooldown auto-confirm 5s, pas de modal de confirmation, retour immédiat au dashboard
 - **Connexion** → Notification crèche rédigée avec chaleur ("Sam a été récupéré — voici sa journée à la crèche"), pas un log technique
-- **Anti-anxiété** → Les données sont présentées factuellement, sans jugement. Pas de comparaison à une "norme" dans le MVP. Pas d'emoji triste ou de couleur rouge
+- **Anti-anxiété** → Les données sont présentées factuellement, sans jugement. La zone cible médicale est affichée comme référence visuelle discrète (zone ombrée), pas comme un objectif à atteindre. Pas d'emoji triste ou de couleur rouge
 - **Anti-culpabilité** → Saisie a posteriori toujours possible et encouragée. Pas de timestamp "en retard" visible
 
 ### Emotional Design Principles
@@ -154,17 +160,18 @@ L'action la plus fréquente est la saisie rapide d'un événement (biberon, déb
 ### Transferable UX Patterns
 
 **Navigation :**
-- **Dashboard-first** — L'écran d'accueil EST le dashboard, pas un menu ou une liste d'actions. Les boutons de saisie rapide sont superposés (FAB ou barre d'action) sans masquer l'information
-- **Bottom sheet pour la saisie** — Les formulaires de saisie glissent depuis le bas de l'écran, gardant le contexte du dashboard visible en arrière-plan
+- **Dashboard-first** — L'écran d'accueil EST le dashboard : hero card + KPI cards + récap. Pas de menu, pas de navigation
+- **Toast pour la saisie** — Les formulaires de saisie apparaissent en toast en bas de l'écran, avec cooldown auto-confirm (5s). Le dashboard reste visible en arrière-plan
 
 **Interaction :**
-- **Saisie numérique directe** — Pour les mL : un champ numérique avec clavier natif, pas de slider ni de roue. Plus rapide, plus précis
-- **Toggle état bébé** — Un seul bouton qui change d'état : "Endormi" ↔ "Réveillé", comme un interrupteur. Pas de formulaire
-- **Sections indépendantes (crèche)** — Cards/accordéons pour siestes, biberons et notes, cochables dans n'importe quel ordre, avec indicateur visuel de complétion
+- **Hero card = contrôle sommeil** — Tap sur la hero card → toast de transition d'état (machine d'états 5 états). Action primaire contextuelle selon l'heure, avec alternative dans les zones d'ambiguïté. Cf. `docs/ux-sleep-state-machine.md`
+- **Slider pour les mL** — Slider horizontal par pas de 10 mL, valeur affichée au-dessus du thumb. Défaut = moyenne des 10 derniers biberons
+- **CTA `+` = import crèche** — Bouton sur chaque KPI card pour la saisie batch (données crèche). Même toast mais sans cooldown, avec sélecteur de moment (Matin/Midi/Après-midi) et boutons Suivant/Terminer. Cf. `docs/ux-kpi-cards.md`
+- **Cooldown auto-confirm** — Les toasts live expirent après 5s (bordure animée anti-horaire). Tap hors toast = confirme l'action
 
 **Visuel :**
 - **Typographie large et lisible** — Chiffres grands et gras pour les totaux (mL, heures), texte secondaire plus petit pour les détails
-- **Couleurs sémantiques douces** — Bleu ciel pour le sommeil, vert tendre pour l'alimentation, lavande pour les notes — pas de rouge/orange
+- **Couleurs sémantiques par catégorie** — Vert/olive pour le sommeil, orange/ambre pour le lait. Chaque catégorie utilise ses propres couleurs pour tous ses éléments
 
 ### Anti-Patterns to Avoid
 
@@ -177,14 +184,14 @@ L'action la plus fréquente est la saisie rapide d'un événement (biberon, déb
 ### Design Inspiration Strategy
 
 **Adopter :**
-- Dashboard-first avec totaux du jour immédiatement visibles
-- Toggle état unique pour la sieste (endormi/réveillé)
-- Bottom sheet pour toutes les saisies
+- Dashboard-first : hero card + KPI cards + récap, totaux visibles en 0 clic
+- Toast avec cooldown auto-confirm pour les saisies rapides
+- Machine d'états sommeil avec transitions contextuelles selon l'heure
 - Sync temps réel transparente sans action utilisateur
 
 **Adapter :**
-- Le chrono sieste de Napper → version serveur-side qui survit à la fermeture de l'app
-- Les cards d'Apple Health → sections souples pour le mode crèche, sans l'aspect clinique
+- Le chrono sieste de Napper → hero card avec compteur temps réel, persisté côté serveur
+- Les cards d'Apple Health → KPI cards avec progress bar, zone cible médicale, moyenne 3j
 - Le pattern de notification de messagerie → notifications chaleur pour la conjointe
 
 **Éviter :**
@@ -213,15 +220,15 @@ L'action la plus fréquente est la saisie rapide d'un événement (biberon, déb
 ### Implementation Approach
 
 - **Design tokens Tailwind** : palette pastel personnalisée, arrondis généreux, typographie douce définis dans `tailwind.config`
-- **Composants headless** : bottom sheets, accordéons (mode crèche), toggles (sieste), modals — comportement accessible, style maison
-- **Composants maison** : dashboard cards, saisie numérique mL, chrono sieste — construits sur mesure avec Tailwind
+- **Composants headless** : toasts, time picker (scroll wheels), toggles — comportement accessible, style maison
+- **Composants maison** : hero card, KPI cards, progress bars, sliders, récap — construits sur mesure avec Tailwind
 
 ### Customization Strategy
 
-- **Palette de couleurs** : définie en collaboration avec la conjointe d'Anthony — tons pastel (bleu ciel sommeil, vert tendre alimentation, lavande notes)
+- **Palette de couleurs** : palette nature/olive — tons verts pour le sommeil, tons chauds orange/ambre pour le lait
 - **Typographie** : police arrondie et douce, chiffres grands et lisibles pour les totaux
 - **Arrondis et ombres** : coins généreux (rounded-2xl+), ombres douces pour la profondeur sans agressivité
-- **Animations** : transitions subtiles sur les interactions (apparition bottom sheet, feedback saisie), pas d'animations gratuites
+- **Animations** : cooldown bordure animée (5s anti-horaire), transitions de thème jour/nuit, feedback toast — pas d'animations gratuites
 - **Responsive** : design mobile-only, optimisé 375-430px de large (tailles iPhone standard)
 
 ## Core User Experience — Defining Interaction
@@ -265,73 +272,85 @@ Le moment différenciant : le **retour crèche**. L'assistante maternelle donne 
 
 **Patterns établis (pas besoin d'éduquer) :**
 - Dashboard avec cartes de résumé (familier : apps santé, météo)
-- Bottom sheet pour la saisie (familier : iOS natif, Google Maps)
-- Toggle on/off pour la sieste (familier : interrupteur)
-- Champ numérique avec clavier natif (familier : tout le monde)
+- Toast en bas de l'écran (familier : Material Design, iOS)
+- Slider horizontal pour les valeurs numériques (familier)
+- Scroll wheels pour le time picker (familier : iOS natif)
 
 **Pattern adapté (légèrement nouveau) :**
-- **Mode crèche** — Saisie par durée + moment de la journée au lieu d'horaires précis. Concept nouveau mais interaction familière (sélecteur de durée + choix matin/midi/après-midi). Pas besoin d'éducation complexe, juste un libellé clair.
+- **Cooldown auto-confirm** — Le toast se confirme automatiquement après 5s (bordure animée). Réduit les taps sans surprendre, car l'action la plus probable est déjà sélectionnée.
+- **Hero card comme contrôle d'état** — Tap sur la carte centrale déclenche la transition d'état du bébé. L'action proposée est contextuelle selon l'heure.
+- **Import crèche via CTA `+`** — Saisie batch par moment de la journée (Matin/Midi/Après-midi) au lieu d'horaires précis.
 
 **Aucun pattern vraiment novel** — samvabien combine des patterns familiers de manière intelligente, ce qui élimine toute courbe d'apprentissage.
 
 ### Experience Mechanics
 
-**1. Saisie biberon :**
-- Initiation : tap sur le bouton biberon (FAB ou barre d'action sur le dashboard)
-- Interaction : bottom sheet s'ouvre, clavier numérique apparaît, saisie des mL
-- Feedback : bottom sheet se ferme, le total mL du jour se met à jour sur le dashboard
+**1. Saisie biberon (live) :**
+- Initiation : tap sur la KPI card lait
+- Interaction : toast biberon avec slider horizontal (pas de 10 mL), valeur par défaut = moyenne des 10 derniers biberons, tap sur l'heure → time picker (scroll wheels)
+- Feedback : cooldown 5s → auto-confirm, KPI card se met à jour, événement apparaît dans le récap
 - Durée cible : < 5 secondes
+- Cf. `docs/ux-kpi-cards.md` § Interactions
 
-**2. Saisie sieste (live) :**
-- Initiation : tap sur le toggle sieste sur le dashboard
-- Interaction : le toggle passe à "Endormi", le chrono démarre (serveur-side), le dashboard affiche "Sam dort depuis 0:00"
-- Feedback : le compteur tourne en temps réel sur le dashboard
-- Fin : tap sur le toggle → "Réveillé", la sieste est enregistrée, le total sommeil se met à jour
+**2. Transition sommeil (live) :**
+- Initiation : tap sur la hero card
+- Interaction : toast avec action primaire contextuelle (sieste/coucher/réveil selon l'heure et l'état), bouton alt dans les zones d'ambiguïté, cooldown 5s → auto-confirm
+- Feedback : la hero card change d'état (emoji, label, compteur temps réel), le thème bascule jour/nuit
+- Cf. `docs/ux-sleep-state-machine.md`
 
-**3. Import crèche :**
-- Initiation : tap sur le bouton "Crèche" (FAB ou barre d'action)
-- Interaction : bottom sheet avec sections indépendantes (siestes / biberons / notes), remplissables dans n'importe quel ordre. Chaque section montre un indicateur de complétion
-- Feedback : chaque section validée met à jour les totaux du dashboard en arrière-plan
-- Fin : fermer le bottom sheet → dashboard complet avec toutes les données crèche intégrées
+**3. Import crèche (batch) :**
+- Initiation : tap sur le CTA `+` de la KPI card (lait ou sommeil)
+- Interaction : toast sans cooldown, sélecteur de moment (Matin/Midi/Après-midi), slider volume ou durée, boutons Suivant (enregistre + réouvre) / Terminer (enregistre + ferme)
+- Feedback : chaque "Suivant" enregistre l'entrée, les KPI cards se mettent à jour
+- Chaque domaine est cloisonné : le `+` lait ne saisit que du lait
+- Cf. `docs/ux-kpi-cards.md` § Tap sur le +
 
 **4. Consultation dashboard :**
 - Initiation : ouvrir l'app
 - Interaction : aucune — tout est visible immédiatement
-- Contenu : total mL, total sommeil, dernier biberon il y a Xh, sieste en cours le cas échéant
-- Profondeur : scroll vers le bas pour voir le détail des événements de la journée
+- Contenu : hero card (état sommeil + durée), 2 KPI cards (lait + sommeil avec progress bar, zone cible, moyenne 3j), récap antéchronologique
+- Profondeur : scroll vers le bas pour le journal de la journée
+- Cf. `docs/ux-recap-today.md`
 
 ## Visual Design Foundation
 
 ### Color System
 
-**Palette retenue : A — Violine** (à valider avec la conjointe d'Anthony)
+**Palette retenue : Nature / Olive** — tons chauds et végétaux, validée.
+
+Deux catégories de données, chacune avec sa propre palette :
+- **Sommeil** : tons verts (olive, sauge)
+- **Lait** : tons chauds (orange, ambre)
 
 **Mode Jour :**
-- **Background** : `#faf7fc` (blanc légèrement violiné)
+- **Background** : `#f6f5ee` (beige chaud)
 - **Surface** : `#ffffff` (blanc pur pour les cartes)
-- **Text** : `#2d2235` (violet très foncé, pas noir)
-- **Text soft** : `#8a7a96` (violet grisé)
-- **Sommeil** : `#f3e8ff` (lavande très clair) / accent `#c4a8e8` / icône `#9678c4`
-- **Lait** : `#fce7f3` (rose poudré très clair) / accent `#e8a8c8` / icône `#c47898`
-- **Notes** : `#ede9fe` (violine très clair) / accent `#b8a8e0` / icône `#8a78b8`
-- **Primary** : `#c4a8e8` (violet doux) sur blanc
-- **Done** : `#e8f5e9` / `#4a8a4a` (vert doux, neutre)
+- **Text** : `#32321e` (olive très foncé)
+- **Text secondary** : `#8a8870` (olive grisé)
+- **Sommeil** : bg `#eaecda` / accent `#8a9a6a` / icône `#6a7a4a`
+- **Lait** : bg `#f5e6d6` / accent `#c08a60` / icône `#a06840`
+- **Hero text** : `#4a5a32` (vert feuille)
+- **Border** : `rgba(0,0,0,0.06)`
+- **Track** (progress bar vide) : `#dce0cc`
 
 **Mode Nuit :**
-- **Background** : `#1a1225` (violet très sombre)
-- **Surface** : `#221830` (violet nuit)
-- **Text** : `#ddd0ea` (lavande clair)
-- **Text soft** : `#8a7a9a`
-- **Sommeil** : `#2a1e3a` / accent `#b89cd8` / icône `#cbb4e8`
-- **Lait** : `#2a1a28` / accent `#d89cb8` / icône `#e8b4cc`
-- **Notes** : `#241a32` / accent `#a890c8` / icône `#bea8d8`
-- **Primary** : `#8a6ab0` sur blanc
+- **Background** : `#181810` (olive très sombre)
+- **Surface** : `#22221a` (olive nuit)
+- **Text** : `#c8c8b0` (beige clair)
+- **Text secondary** : `#7a7a60`
+- **Sommeil** : bg `#222818` / accent `#7a8a5a` / icône `#98a878`
+- **Lait** : bg `#261e14` / accent `#b08050` / icône `#cca070`
+- **Hero text** : `#98a878` (vert doux)
+- **Border** : `rgba(255,255,255,0.06)`
+- **Track** : `#3e402e`
 
 **Bascule jour/nuit :**
-- Automatique selon les préférences système iOS (prefers-color-scheme)
-- Pas de toggle manuel dans le MVP
+- Pilotée par l'**état du bébé** (machine d'états sommeil), pas par les préférences système
+- `awake` → thème jour (light)
+- `nap`, `night`, `night-wake`, `night-sleep` → thème nuit (dark)
+- Cf. `docs/ux-sleep-state-machine.md` pour la machine d'états complète
 
-**Référence visuelle :** `_bmad-output/planning-artifacts/color-theme-visualizer.html` (thème A)
+**Référence visuelle :** `docs/design-reference.html` — maquettes pixel-perfect avec les couleurs exactes
 
 ### Typography System
 
@@ -369,13 +388,13 @@ Le moment différenciant : le **retour crèche**. L'assistante maternelle donne 
 
 **Arrondis :**
 - `14-16px` : icônes, badges, status
-- `20px` : cartes KPI, sleep banner, bottom sheet sections
-- `32px` : phone frame, bottom sheet top corners
+- `20px` : cartes KPI, hero card, toast
+- `32px` : phone frame, toast top corners
 
 **Layout :**
 - Single column, pleine largeur (375-430px)
 - Pas de grille multi-colonnes
-- Bottom sheet : remonte depuis le bas, garde le contexte dashboard visible
+- Toasts : apparaissent en bas de l'écran, le dashboard reste visible en arrière-plan
 
 ### Accessibility Considerations
 
@@ -384,3 +403,37 @@ Le moment différenciant : le **retour crèche**. L'assistante maternelle donne 
 - **Touch targets** : minimum 44px pour tous les boutons et éléments interactifs (guideline Apple)
 - **Taille de police** : jamais en dessous de 11px, même pour les captions
 - **Pas de couleur comme seul indicateur** : toujours un label ou une icône en complément
+
+## Detailed UX Specifications
+
+Les spécifications UX détaillées sont documentées dans des fichiers dédiés. Ce document reste la source de vérité pour la vision, les principes et le design system ; les docs ci-dessous spécifient le comportement exact de chaque composant.
+
+### Machine d'états sommeil
+
+**Fichier :** `docs/ux-sleep-state-machine.md`
+
+5 états (`awake`, `nap`, `night`, `night-wake`, `night-sleep`) avec transitions contextuelles selon l'heure. Définit le comportement de la hero card (tap → toast de transition), les seuils horaires, les actions primaires/alternatives, le time picker, et le bootstrap/persistance.
+
+### KPI Cards
+
+**Fichier :** `docs/ux-kpi-cards.md`
+
+Deux cartes (Lait + Sommeil) avec progress bar, zone cible médicale (basée sur le poids/âge du bébé), moyenne glissante 3 jours contextualisée à l'heure. Définit la fenêtre de données coucher→coucher, le comportement dynamique temps réel, le toast biberon (tap live), le mode batch import crèche (CTA `+`), et les états initiaux.
+
+### Récap Aujourd'hui
+
+**Fichier :** `docs/ux-recap-today.md`
+
+Liste antéchronologique des événements du cycle en cours (nuit, réveils nocturnes, siestes, biberons). Définit l'anatomie des lignes, le regroupement des événements nocturnes, le tri des imports sans heure précise, le toast d'édition (tap sur une ligne), la suppression avec undo, et l'état vide.
+
+### Onboarding & Profil
+
+**Fichier :** `docs/ux-onboarding-profil.md`
+
+Landing screen (3 CTA : démo, créer, rejoindre), onboarding 3 champs (prénom, date de naissance, poids via scroll wheels), banner de bienvenue avec code d'invitation, mode démo, page profil (édition inline, rappel de pesée, gestion foyer/appareils), sessions JWT. Basé sur le modèle foyer du projet atable.
+
+### Maquettes de référence
+
+**Fichier :** `docs/design-reference.html`
+
+Maquettes pixel-perfect (~1500 lignes) couvrant toutes les vues : hero card (tous les états + flow), KPI cards (jour/nuit, avec/sans données), toasts (transition, biberon live, batch import, time picker, édition, undo), récap, landing, onboarding, profil, join, banner de bienvenue, mode démo, hero card post-import crèche. Contient les couleurs exactes (`COLORS` object) et les données de démo.

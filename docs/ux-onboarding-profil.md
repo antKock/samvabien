@@ -6,6 +6,26 @@ L'onboarding permet de créer un foyer et d'enregistrer les informations du béb
 
 > **Référence architecturale** : `/Users/anthony/Documents/dev/claude/atable` — household-based auth, join codes, device sessions, demo mode. L'architecte et les devs s'y réfèreront pour les choix d'implémentation (JWT, sessions, Supabase, etc.).
 
+## Flow global
+
+```mermaid
+flowchart TD
+    L[Landing screen] -->|Essayer la démo| D[Mode démo]
+    L -->|Créer un profil| O[Onboarding form]
+    L -->|Rejoindre un foyer| J[JoinScreen]
+
+    O -->|Validation 3 champs| H1[Home + WelcomeBanner]
+    J -->|Code valide| H2[Home]
+    D -->|Session éphémère| H3[Home + bandeau démo]
+
+    H1 --> P[Profil via Prénom ⚙]
+    H2 --> P
+    H3 --> P
+
+    P -->|Quitter le profil| L
+    H3 -->|Quitter démo| L
+```
+
 ## Scope
 
 - **Mono-bébé** : un seul bébé par foyer. Pas de sélecteur multi-bébé pour le moment.
@@ -19,17 +39,19 @@ L'onboarding permet de créer un foyer et d'enregistrer les informations du béb
 
 ### Options
 
-| # | Label | Action |
-|---|-------|--------|
-| 1 | **Créer un profil** | Démarre l'onboarding (création foyer + bébé) |
-| 2 | **Rejoindre un foyer** | Saisie d'un code d'invitation pour rejoindre un foyer existant |
-| 3 | **Essayer la démo** | Crée une session éphémère avec des données fictives |
+| # | Label | Style | Action |
+|---|-------|-------|--------|
+| 1 | **Essayer la démo** | Primary | Crée une session éphémère avec des données fictives |
+| 2 | **Créer un profil** | Secondary | Démarre l'onboarding (création foyer + bébé) |
+| 3 | **Rejoindre un foyer** | Lien discret | Saisie d'un code d'invitation pour rejoindre un foyer existant |
 
 ### Style
 
 - Fond neutre (`bg`), centré verticalement.
-- 3 boutons empilés : le premier en style primary, les deux suivants en style secondary.
-- Pas d'illustration, pas de logo pour le MVP — juste les CTA.
+- Illustration bébé (visage + couette + feuilles) au-dessus du nom de l'app.
+- Nom de l'app « **pousse** » en 32px, font-weight 800, couleur `sleep.icon`.
+- Tagline « Suivi bébé simple et serein » en 10px, font-weight 600, couleur `textSec`.
+- 3 boutons empilés en bas : démo en primary (accentColor, texte blanc), créer en secondary (fond accent/10, border accent/20), rejoindre en lien sans fond.
 
 ---
 
@@ -42,7 +64,7 @@ Trois champs collectés sur un seul écran, dans l'ordre :
 | Champ | Input | Contraintes |
 |-------|-------|-------------|
 | **Prénom du bébé** | Champ texte, clavier standard | Obligatoire, 1–30 caractères |
-| **Date de naissance** | Date picker natif | Obligatoire, ≤ aujourd'hui |
+| **Date de naissance** | Date picker custom (scroll wheels, même UX que le time picker) | Obligatoire, ≤ aujourd'hui |
 | **Poids actuel** | Scroll wheels (même UX que le time picker) | Obligatoire, 2.0–15.0 kg |
 
 ### Poids — Scroll wheels
@@ -84,14 +106,16 @@ Affiché une seule fois après la création du foyer, en haut de l'écran princi
 Partagez ce code pour que l'autre parent
 puisse rejoindre le foyer :
 
-         OLIVE-4821
+         OLVR-4821
 
      [ Copier le lien ]
 ```
 
-- **Code d'invitation** : format `MOT-CHIFFRES` (ex. `OLIVE-4821`), affiché en gros (16px, font-weight 700, `text`).
-- **Bouton "Copier le lien"** : copie le lien d'invitation dans le presse-papier (`/join/OLIVE-4821`). Style secondary.
+- **Code d'invitation** : format `XXXX-0000` (ex. `OLVR-4821`), affiché en gros (16px, font-weight 700, `text`).
+- **Bouton "Copier le lien"** : copie le lien d'invitation dans le presse-papier (`/join/OLVR-4821`). Style secondary.
 - **Fermeture** : bouton ✕ en haut à droite, ou tap hors banner. Une fois fermé, ne réapparaît plus. Le code reste accessible dans le profil.
+
+> **Maquette** : cf. `design-reference.html` § Welcome Banner.
 
 ---
 
@@ -99,9 +123,11 @@ puisse rejoindre le foyer :
 
 ### Saisie du code
 
-- Champ texte unique, placeholder "Code d'invitation" (ex. `OLIVE-4821`).
-- Auto-lookup : validation automatique dès que le format est reconnu (pas besoin de bouton "Valider").
+- Champ texte unique, placeholder "Code d'invitation" (ex. `OLVR-4821`).
+- Auto-lookup : validation automatique dès que le format `XXXX-0000` est reconnu (8 caractères alphanumériques, insensible à la casse, tiret optionnel). Debounce 300ms.
 - Feedback : spinner pendant la vérification, message d'erreur si code invalide ("Code introuvable, vérifiez la saisie").
+
+> **Maquette** : cf. `design-reference.html` § Rejoindre (états vide, chargement, erreur, succès).
 
 ### Lien d'invitation
 
@@ -118,8 +144,24 @@ Alternative au code : le parent qui a créé le foyer envoie un lien `/join/[COD
 
 - Crée une session éphémère avec des données fictives (bébé "Léo", 4 mois, historique de biberons et siestes).
 - Fonctionnalités identiques à un vrai foyer, sauf : pas de code d'invitation, pas de multi-appareil.
-- Un bandeau discret en bas de l'écran rappelle "Mode démo" avec un CTA "Créer un vrai profil".
+- Un bandeau discret en **haut** de l'écran rappelle "Mode démo — données non conservées" avec un CTA "Quitter".
 - Les données démo ne sont pas conservées si le parent crée un vrai profil.
+
+### Données démo
+
+- Bébé "Léo", né il y a ~4 mois. Journée réaliste avec historique de biberons et siestes.
+- Les données sont **cohérentes chaque jour**, peu importe l'heure d'accès : le compte démo simule un snapshot figé à **17h30** (journée bien remplie, suffisamment d'événements pour montrer toutes les fonctionnalités).
+- Les KPI cards, le récap et la hero card reflètent ces données générées.
+
+### Implémentation technique — contraintes pour l'architecte
+
+> L'architecte choisira l'approche technique, en respectant ces trois contraintes :
+
+1. **Données cohérentes chaque jour** : le visiteur voit toujours une journée réaliste et remplie, quel que soit le moment d'accès.
+2. **Toutes les fonctionnalités fonctionnent** : ajouter un biberon, toggle sommeil, modifier le profil, etc. — tout doit répondre normalement.
+3. **Impossible de salir les données** : les actions d'un visiteur ne doivent jamais altérer l'état de base du compte démo (sinon il devient incohérent pour le visiteur suivant).
+
+Les modifications du visiteur sont persistées en **session storage** uniquement. Aucune écriture en base de données.
 
 ---
 
@@ -157,11 +199,14 @@ Volontairement peu découvrable — le profil est rarement consulté. Le prénom
 | Champ | Affichage | Édition |
 |-------|-----------|---------|
 | **Prénom** | Texte inline, éditable au tap | Champ texte, validation idem onboarding |
-| **Date de naissance** | Date formatée (ex. "7 mars 2026") | Date picker natif |
+| **Date de naissance** | Date formatée (ex. "7 mars 2026") | Date picker custom (scroll wheels) |
 | **Poids** | Valeur formatée (ex. "4,2 kg") | Scroll wheels (même composant que l'onboarding) |
 
 - Chaque champ est éditable au tap (inline editing, pas de page séparée).
 - Sauvegarde automatique au blur / validation — pas de bouton "Enregistrer" global.
+- Le poids s'édite via les scroll wheels inline avec un bouton "OK" pour confirmer.
+
+> **Maquette** : cf. `design-reference.html` § Profil édition (état édition poids).
 
 #### 2. Rappel de pesée
 
@@ -178,7 +223,7 @@ Volontairement peu découvrable — le profil est rarement consulté. Le prénom
 
 | Élément | Description |
 |---------|-------------|
-| **Code d'invitation** | Affiché en gros, format `MOT-CHIFFRES` |
+| **Code d'invitation** | Affiché en gros, format `XXXX-0000` |
 | **Bouton "Copier le lien"** | Copie `/join/[CODE]` dans le presse-papier |
 | **Appareils connectés** | Liste des appareils avec nom/type et date de dernière connexion |
 | **Révoquer un appareil** | Bouton par appareil, confirmation simple ("Déconnecter cet appareil ?") |
@@ -187,9 +232,9 @@ Volontairement peu découvrable — le profil est rarement consulté. Le prénom
 
 | Action | Style | Comportement |
 |--------|-------|-------------|
-| **Quitter le foyer** | Bouton destructif (rouge) | Confirmation ("Quitter le foyer ? Vous perdrez l'accès aux données.") → supprime la session, retour au landing screen |
+| **Quitter le profil** | Bouton destructif (rouge) | Confirmation ("Quitter le profil ? Vous perdrez l'accès aux données.") → supprime la session, retour au landing screen |
 
-- Si le dernier membre quitte → le foyer et ses données sont marqués pour suppression (soft delete, rétention 30 jours).
+- Si le dernier membre quitte → le foyer et ses données sont **supprimés définitivement** (hard delete).
 
 ---
 
@@ -202,13 +247,14 @@ Reprise du modèle **atable** :
 - **Pas de compte individuel** : le foyer est l'entité centrale. Chaque appareil a une session indépendante.
 - **JWT** : stocké en cookie httpOnly, expiration ~1 an, renouvelé silencieusement.
 - **Multi-appareil** : chaque appareil connecté est une session distincte. Un parent peut révoquer un appareil depuis le profil.
-- **Tables** : `households` (id, name, baby_name, baby_dob, baby_weight, join_code, created_at) + `device_sessions` (id, household_id, device_name, last_seen, created_at).
+- **Tables** : `pousse_households` (id, baby_name, baby_dob, baby_weight, join_code, created_at) + `pousse_device_sessions` (id, household_id, device_name, last_seen, created_at).
 
 ### Code d'invitation
 
-- Format : `MOT-CHIFFRES` (ex. `OLIVE-4821`).
+- Format : `XXXX-0000` — 4 lettres majuscules aléatoires + tiret + 4 chiffres aléatoires (ex. `OLVR-4821`).
+- Le tiret est ajouté automatiquement à l'affichage et dans le lien ; l'utilisateur peut saisir avec ou sans tiret.
 - Généré à la création du foyer, immuable.
-- Unicité garantie côté serveur.
+- Unicité garantie côté serveur (26⁴ × 10⁴ ≈ 4,5 milliards de combinaisons).
 - Lien d'invitation : `[base_url]/join/[CODE]`.
 
 ---
@@ -251,9 +297,9 @@ Le projet atable (`/Users/anthony/Documents/dev/claude/atable`) contient une imp
 - **Join** : saisie code avec auto-lookup ou lien `/join/[CODE]`
 - **Profil** : `src/components/HouseholdMenuContent.tsx` (nom inline editable, code, lien, appareils, quitter)
 - **Auth** : JWT via `jose` (HS256), middleware route protection, sessions ~365 jours
-- **DB** : tables `households` + `device_sessions` dans Supabase
+- **DB** : tables `households` + `device_sessions` dans Supabase (pousse utilise ses propres tables préfixées `pousse_`)
 
-L'architecte adaptera cette base en ajoutant les champs bébé (prénom, date de naissance, poids) à la table `households`.
+L'architecte adaptera cette base avec des tables dédiées préfixées `pousse_` et les champs bébé (prénom, date de naissance, poids).
 
 ### Composants à créer
 
